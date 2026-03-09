@@ -1,0 +1,79 @@
+site_name: MajorOps
+site_description: A Practitioner's Guide to Major Incident Command in Modern IT Operations
+site_url: https://about.majorops.io
+docs_dir: docs
+site_dir: site
+
+theme:
+  name: material
+  custom_dir: overrides
+  palette:
+    - scheme: slate
+      primary: custom
+      accent: custom
+  font:
+    text: IBM Plex Sans
+    code: IBM Plex Mono
+  features:
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.highlight
+    - search.suggest
+    - content.code.copy
+
+extra_css:
+  - stylesheets/extra.css
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
+  - scripts/mermaid-init.js
+
+plugins:
+  - search
+  - meta
+
+nav:
+  - Home: index.md
+  - Foundations:
+    - Philosophy: philosophy/PHILOSOPHY.md
+    - Glossary: GLOSSARY.md
+    - Domains: DOMAINS.md
+  - Command Structure:
+    - IT-ICS Roles: philosophy/ICS-IT-STRUCTURE.md
+  - Architecture:
+    - Signal Flow: architecture/signal-flow.md
+  - User Guide:
+    - MIM Operator Guide: user-guide/mim.md
+    - Stakeholder View: user-guide/stakeholder.md
+    - Executive View: user-guide/executive.md
+    - Personas & User Stories: user-guide/personas.md
+  - Operations:
+    - Alarm Levels: ALARM-LEVELS.md
+    - Exposure Notation: philosophy/EXPOSURE_NOTATION.md
+    - Run Card System: RUNCARD-SYSTEM.md
+    - Run Cards: runcards/index.md
+  - Governance:
+    - After Action: governance/after-action.md
+    - Response Reputation: governance/RESPONSE-REPUTATION.md
+    - KPI Source of Truth: governance/kpis.md
+  - API Reference: api-reference/index.html
+  - Data Dictionary: data-dictionary.md
+  - Contributing: CONTRIBUTING.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - attr_list
+  - def_list
+  - pymdownx.snippets:
+      base_path: ['.']
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true

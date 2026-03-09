@@ -1,0 +1,1834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MajorOps — Brand Showcase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700;800;900&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ============================================================
+       BRAND TOKENS
+       ============================================================ */
+    :root {
+      --color-fire-red:        #CC0000;
+      --color-fire-red-dark:   #990000;
+      --color-fire-red-light:  #FF3333;
+      --color-green:           #00CC00;
+      --color-green-bright:    #00FF00;
+      --color-green-dim:       #008800;
+      --color-black:           #0A0A0A;
+      --color-white:           #FFFFFF;
+      --color-charcoal:        #1A1A1A;
+      --color-slate:           #2A2A2A;
+      --color-storm:           #404040;
+      --color-fog:             #808080;
+      --color-smoke:           #CCCCCC;
+
+      --color-status-critical:   #CC0000;
+      --color-status-high:       #FF6600;
+      --color-status-medium:     #FFAA00;
+      --color-status-low:        #00CC00;
+      --color-status-active:     #CC0000;
+      --color-status-monitoring: #FFAA00;
+      --color-status-resolved:   #00CC00;
+
+      --font-display:  'Orbitron', sans-serif;
+      --font-heading:  'Saira Condensed', sans-serif;
+      --font-body:     'IBM Plex Sans', sans-serif;
+      --font-mono:     'IBM Plex Mono', monospace;
+
+      --space-2xs: 4px;
+      --space-xs:  8px;
+      --space-sm:  12px;
+      --space-md:  16px;
+      --space-lg:  24px;
+      --space-xl:  32px;
+      --space-2xl: 48px;
+      --space-3xl: 64px;
+
+      --shadow-card: 0 8px 24px rgba(0,0,0,0.4);
+      --radius: 0px;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.2); opacity: 0.7; }
+    }
+    @keyframes pulse-fast {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.3); opacity: 0.5; }
+    }
+    @keyframes border-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(204,0,0,0.4); }
+      50%       { box-shadow: 0 0 0 6px rgba(204,0,0,0); }
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-radius: var(--radius);
+    }
+
+    html, body {
+      background: var(--color-black);
+      color: var(--color-white);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================================
+       LAYOUT
+       ============================================================ */
+    .showcase-nav {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: var(--color-black);
+      border-bottom: 1px solid var(--color-slate);
+      padding: 0 var(--space-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+      height: 56px;
+    }
+
+    .showcase-nav a {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .showcase-nav a:hover { color: var(--color-white); }
+
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--space-3xl) var(--space-xl);
+    }
+
+    .section {
+      margin-bottom: var(--space-3xl);
+    }
+
+    .section-label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--color-fire-red);
+      margin-bottom: var(--space-xs);
+    }
+
+    .section-title {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-white);
+      margin-bottom: var(--space-xs);
+    }
+
+    .section-desc {
+      font-size: 14px;
+      color: var(--color-fog);
+      margin-bottom: var(--space-xl);
+      max-width: 600px;
+    }
+
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--color-slate);
+      margin-bottom: var(--space-3xl);
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-lg); }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-md); }
+    .flex-row { display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap; }
+    .flex-col { display: flex; flex-direction: column; gap: var(--space-md); }
+
+    /* ============================================================
+       HERO
+       ============================================================ */
+    .hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-xl);
+      padding: var(--space-3xl) 0;
+      border-bottom: 2px solid var(--color-fire-red);
+      margin-bottom: var(--space-3xl);
+    }
+
+    .hero-left {}
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-green);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero-title {
+      font-family: var(--font-heading);
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      line-height: 1.05;
+      margin-bottom: var(--space-md);
+    }
+
+    .hero-title span { color: var(--color-fire-red); }
+
+    .hero-tagline {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--color-fog);
+      letter-spacing: 1px;
+    }
+
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      align-items: flex-end;
+      flex-shrink: 0;
+    }
+
+    .hero-meta {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-storm);
+      letter-spacing: 1px;
+      text-align: right;
+    }
+
+    /* ============================================================
+       LOGO
+       ============================================================ */
+    /* ============================================================
+       LOGO — Wordmark with prompt character.
+       Structure: [prompt] [MAJOR][ops]
+       prompt = IBM Plex Mono, smaller, tucked in — Option B
+       MAJOR  = Orbitron
+       ops    = IBM Plex Mono, lowercase
+
+       Peace Time (default): prompt dim green static · MAJOR smoke · ops green
+       War Time (incident):  prompt red blinking   · MAJOR red heavy · ops white
+       ============================================================ */
+
+    .logo {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0;
+      text-decoration: none;
+      line-height: 1;
+    }
+
+    /* The prompt character — smaller, tucked, IBM Plex Mono */
+    .logo .prompt {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      position: relative;
+      top: 2px; /* optical alignment — sits just below baseline */
+      margin-right: 4px;
+    }
+
+    .logo .major {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .logo .ops {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 400;
+      letter-spacing: -1px;
+    }
+
+    /* Peace Time — default state */
+    .logo.peacetime .prompt { color: var(--color-green-dim); font-weight: 400; }
+    .logo.peacetime .major  { color: var(--color-smoke); }
+    .logo.peacetime .ops    { color: var(--color-green); }
+
+    /* War Time — active incident */
+    .logo.wartime .prompt {
+      color: var(--color-fire-red);
+      font-weight: 700;
+      animation: blink 1.5s infinite;
+    }
+    .logo.wartime .major {
+      color: var(--color-fire-red);
+      font-weight: 900;
+      letter-spacing: 4px;
+    }
+    .logo.wartime .ops {
+      color: var(--color-white);
+      font-weight: 700;
+    }
+
+    /* Size variants — prompt scales at ~55% of wordmark size */
+    .logo.lg .prompt { font-size: 30px; }
+    .logo.lg .major  { font-size: 56px; }
+    .logo.lg .ops    { font-size: 56px; }
+
+    .logo.md .prompt { font-size: 18px; }
+    .logo.md .major  { font-size: 32px; }
+    .logo.md .ops    { font-size: 32px; }
+
+    .logo.sm .prompt { font-size: 11px; }
+    .logo.sm .major  { font-size: 20px; letter-spacing: 2px; }
+    .logo.sm .ops    { font-size: 20px; }
+
+    .logo.xs .prompt { font-size: 8px; }
+    .logo.xs .major  { font-size: 14px; letter-spacing: 1px; }
+    .logo.xs .ops    { font-size: 14px; }
+
+    /* Severity states — wartime variants */
+    .logo.wartime.severity-high .prompt   { color: var(--color-status-high); }
+    .logo.wartime.severity-high .major    { color: var(--color-status-high); }
+    .logo.wartime.severity-medium .prompt { color: var(--color-status-medium); }
+    .logo.wartime.severity-medium .major  { color: var(--color-status-medium); }
+
+    .logo-state-label {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-top: var(--space-xs);
+    }
+
+    .logo-demo-card {
+      background: var(--color-charcoal);
+      border: 1px solid var(--color-slate);
+      padding: var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-sm);
+    }
+
+    /* ============================================================
+       COLOR SWATCHES
+       ============================================================ */
+    .swatch-row {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+
+    .swatch {
+      flex: 1;
+      height: 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: var(--space-xs);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .swatch-name {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    .swatch-hex {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      opacity: 0.7;
+    }
+
+    .swatch-light .swatch-name,
+    .swatch-light .swatch-hex { color: var(--color-black); }
+    .swatch-dark  .swatch-name,
+    .swatch-dark  .swatch-hex { color: var(--color-white); }
+
+    .swatch-group-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-bottom: var(--space-xs);
+    }
+
+    /* ============================================================
+       TYPOGRAPHY
+       ============================================================ */
+    .type-row {
+      display: flex;
+      align-items: baseline;
+      gap: var(--space-lg);
+      padding: var(--space-lg) 0;
+      border-bottom: 1px solid var(--color-slate);
+    }
+    .type-meta {
+      width: 180px;
+      flex-shrink: 0;
+    }
+    .type-meta-name {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+    }
+    .type-meta-detail {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-storm);
+      margin-top: 2px;
+    }
+    .type-sample { flex: 1; }
+
+    /* ============================================================
+       BADGES
+       ============================================================ */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2xs);
+      padding: 3px 8px;
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .badge-critical   { color: var(--color-status-critical);   border-color: var(--color-status-critical);   }
+    .badge-high       { color: var(--color-status-high);       border-color: var(--color-status-high);       }
+    .badge-medium     { color: var(--color-status-medium);     border-color: var(--color-status-medium);     }
+    .badge-low        { color: var(--color-status-low);        border-color: var(--color-status-low);        }
+    .badge-active     { color: var(--color-status-active);     border-color: var(--color-status-active);     }
+    .badge-monitoring { color: var(--color-status-monitoring); border-color: var(--color-status-monitoring); }
+    .badge-resolved   { color: var(--color-status-resolved);   border-color: var(--color-status-resolved);   }
+    .badge-neutral    { color: var(--color-fog);               border-color: var(--color-storm);             }
+
+    .badge-dot.critical   { background: var(--color-status-critical);   }
+    .badge-dot.high       { background: var(--color-status-high);       }
+    .badge-dot.medium     { background: var(--color-status-medium);     }
+    .badge-dot.low        { background: var(--color-status-low);        }
+    .badge-dot.active     { background: var(--color-status-active);     animation: pulse 1.5s ease-in-out infinite; }
+    .badge-dot.monitoring { background: var(--color-status-monitoring); }
+    .badge-dot.resolved   { background: var(--color-status-resolved);   }
+
+    /* ============================================================
+       BUTTONS
+       ============================================================ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: 10px var(--space-lg);
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--color-fire-red);
+      color: var(--color-white);
+      border-color: var(--color-fire-red);
+    }
+    .btn-primary:hover { background: var(--color-fire-red-dark); border-color: var(--color-fire-red-dark); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--color-white);
+      border-color: var(--color-slate);
+    }
+    .btn-ghost:hover { border-color: var(--color-fire-red); color: var(--color-fire-red); }
+
+    .btn-green {
+      background: var(--color-green-dim);
+      color: var(--color-green);
+      border-color: var(--color-green-dim);
+    }
+    .btn-green:hover { background: #005500; border-color: var(--color-green); }
+
+    .btn-danger {
+      background: transparent;
+      color: var(--color-fire-red-light);
+      border-color: var(--color-fire-red);
+    }
+    .btn-danger:hover { background: rgba(204,0,0,0.15); }
+
+    /* ============================================================
+       PHASE BAR
+       ============================================================ */
+    .phase-bar {
+      display: flex;
+      width: 100%;
+      gap: 2px;
+    }
+
+    .phase-step {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 4px;
+      font-family: var(--font-heading);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      position: relative;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+      white-space: nowrap;
+    }
+
+    .phase-step:first-child {
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+    }
+    .phase-step:last-child {
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%);
+    }
+
+    .phase-step.completed { background: var(--color-green-dim); color: var(--color-green); }
+    .phase-step.current   { background: var(--color-fire-red-dark); color: var(--color-white); }
+    .phase-step.current.severity-high     { background: #883300; color: var(--color-status-high); }
+    .phase-step.current.severity-medium   { background: #664400; color: var(--color-status-medium); }
+    .phase-step.future    { background: var(--color-storm); color: var(--color-fog); }
+
+    .phase-bar-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-bottom: var(--space-xs);
+    }
+
+    .phase-bar-wrap {
+      background: var(--color-charcoal);
+      border: 1px solid var(--color-slate);
+      padding: var(--space-md) var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    /* ============================================================
+       CARDS
+       ============================================================ */
+    .card {
+      background: var(--color-charcoal);
+      border: 1px solid var(--color-slate);
+      padding: var(--space-lg);
+      box-shadow: var(--shadow-card);
+    }
+
+    .card-accent-red   { border-left: 3px solid var(--color-fire-red); }
+    .card-accent-green { border-left: 3px solid var(--color-green); }
+    .card-accent-amber { border-left: 3px solid var(--color-status-medium); }
+    .card-accent-orange{ border-left: 3px solid var(--color-status-high); }
+
+    /* ============================================================
+       INCIDENT CARD (Status Page)
+       ============================================================ */
+    .incident-card {
+      background: var(--color-charcoal);
+      border: 1px solid var(--color-slate);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      transition: border-color 0.2s;
+      cursor: pointer;
+      margin-bottom: var(--space-md);
+    }
+    .incident-card:hover { border-color: var(--color-fog); }
+
+    .incident-card-header {
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      border-bottom: 1px solid var(--color-slate);
+    }
+
+    .incident-card-body {
+      padding: var(--space-lg);
+    }
+
+    .incident-title {
+      font-family: var(--font-heading);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-white);
+      margin-bottom: var(--space-xs);
+    }
+
+    .incident-description {
+      font-size: 13px;
+      color: var(--color-smoke);
+      line-height: 1.5;
+      margin-bottom: var(--space-lg);
+    }
+
+    .incident-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: var(--space-sm);
+    }
+
+    .incident-stat {
+      background: var(--color-slate);
+      border: 1px solid var(--color-storm);
+      padding: var(--space-sm) var(--space-md);
+    }
+
+    .incident-stat-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-bottom: var(--space-2xs);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .incident-stat-value {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1.1;
+    }
+
+    .incident-stat-sub {
+      font-size: 10px;
+      color: var(--color-fog);
+      margin-top: 2px;
+    }
+
+    .incident-stat.stat-impact .incident-stat-value { color: var(--color-fire-red-light); }
+    .incident-stat.stat-duration .incident-stat-value { color: var(--color-status-high); }
+
+    .incident-card-footer {
+      padding: var(--space-sm) var(--space-lg);
+      border-top: 1px solid var(--color-slate);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .incident-card-footer-left {
+      font-size: 10px;
+      color: var(--color-fog);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .incident-card-footer-right {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-fog);
+    }
+
+    .chevron-right {
+      width: 16px;
+      height: 16px;
+      border-right: 2px solid var(--color-fog);
+      border-top: 2px solid var(--color-fog);
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
+    /* ============================================================
+       STATUS PAGE MOCK
+       ============================================================ */
+    .status-page-mock {
+      background: var(--color-black);
+      border: 1px solid var(--color-slate);
+      overflow: hidden;
+    }
+
+    .mock-topbar {
+      background: var(--color-black);
+      border-bottom: 1px solid var(--color-slate);
+      padding: var(--space-sm) var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* mock-logo-sm handled by .logo.sm class */
+
+    .mock-content { padding: var(--space-lg); }
+
+    .status-banner {
+      background: rgba(204, 0, 0, 0.12);
+      border: 1px solid var(--color-fire-red);
+      border-left: 4px solid var(--color-fire-red);
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-lg);
+    }
+
+    .status-banner-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .status-banner-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(204,0,0,0.2);
+      border: 1px solid var(--color-fire-red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .status-banner-title {
+      font-family: var(--font-heading);
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-fire-red-light);
+    }
+
+    .status-banner-time {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--color-fog);
+      margin-top: 2px;
+    }
+
+    .status-banner-counts {
+      display: flex;
+      gap: var(--space-sm);
+    }
+
+    .status-count-box {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--color-storm);
+      padding: var(--space-xs) var(--space-md);
+      text-align: center;
+      min-width: 64px;
+    }
+
+    .status-count-num {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1;
+    }
+
+    .status-count-label {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-top: 2px;
+    }
+
+    .status-count-box.count-critical .status-count-num { color: var(--color-status-critical); }
+    .status-count-box.count-high     .status-count-num { color: var(--color-status-high); }
+
+    .mock-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--space-md);
+    }
+
+    .mock-section-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--color-white);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+    }
+
+    .mock-section-count {
+      font-size: 11px;
+      color: var(--color-fog);
+    }
+
+    /* ============================================================
+       INCIDENT DETAIL MOCK (3 Sticky Bars)
+       ============================================================ */
+    .detail-mock {
+      background: var(--color-black);
+      border: 1px solid var(--color-slate);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .detail-bar-top {
+      background: var(--color-black);
+      border-bottom: 1px solid var(--color-slate);
+      padding: var(--space-sm) var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+
+    .back-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      cursor: pointer;
+      padding: 4px 8px;
+      border: 1px solid var(--color-storm);
+      transition: all 0.15s;
+    }
+    .back-btn:hover { color: var(--color-white); border-color: var(--color-fog); }
+
+    .back-chevron {
+      width: 8px;
+      height: 8px;
+      border-left: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg);
+    }
+
+    .detail-incident-title {
+      font-family: var(--font-heading);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--color-white);
+      flex: 1;
+    }
+
+    .detail-bar-phase {
+      background: var(--color-black);
+      border-bottom: 1px solid var(--color-slate);
+      padding: var(--space-xs) var(--space-lg);
+    }
+
+    .detail-content {
+      padding: var(--space-lg);
+      min-height: 200px;
+    }
+
+    .detail-bar-bottom {
+      background: var(--color-charcoal);
+      border-top: 2px solid var(--color-slate);
+      display: flex;
+    }
+
+    .detail-bottom-stat {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-sm) var(--space-md);
+      border-right: 1px solid var(--color-slate);
+    }
+    .detail-bottom-stat:last-child { border-right: none; }
+
+    .stat-num {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--color-white);
+      line-height: 1.2;
+    }
+    .stat-lbl {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-top: 2px;
+    }
+
+    /* ============================================================
+       TERMINAL BLOCK
+       ============================================================ */
+    .terminal-block {
+      background: var(--color-black);
+      border: 2px solid var(--color-green-dim);
+      padding: var(--space-lg);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .terminal-prompt { color: var(--color-green); }
+    .terminal-cmd    { color: var(--color-white); }
+    .terminal-out    { color: var(--color-smoke); }
+    .terminal-err    { color: var(--color-fire-red-light); }
+    .terminal-dim    { color: var(--color-fog); }
+
+    /* ============================================================
+       SPACING TOKENS
+       ============================================================ */
+    .token-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--color-slate);
+    }
+    .token-swatch-wrap { width: 80px; flex-shrink: 0; }
+    .token-bar {
+      background: var(--color-fire-red);
+      height: 8px;
+    }
+    .token-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-smoke);
+      width: 100px;
+    }
+    .token-value {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-fog);
+    }
+
+    /* ============================================================
+       ANIMATION DEMOS
+       ============================================================ */
+    .anim-demo {
+      background: var(--color-charcoal);
+      border: 1px solid var(--color-slate);
+      padding: var(--space-lg);
+      display: flex;
+      align-items: center;
+      gap: var(--space-lg);
+    }
+
+    .anim-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      width: 140px;
+      flex-shrink: 0;
+    }
+
+    .blink-cursor {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-white);
+      animation: blink 1.5s infinite;
+    }
+
+    .pulse-dot-lg {
+      width: 12px;
+      height: 12px;
+      background: var(--color-green);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .pulse-dot-critical {
+      width: 12px;
+      height: 12px;
+      background: var(--color-fire-red);
+      border-radius: 50%;
+      animation: pulse-fast 0.8s ease-in-out infinite;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="showcase-nav">
+    <a class="logo peacetime md" href="#">
+      <span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span>
+    </a>
+    <a href="#logo">Logo</a>
+    <a href="#color">Color</a>
+    <a href="#typography">Type</a>
+    <a href="#badges">Badges</a>
+    <a href="#phases">Phase Bar</a>
+    <a href="#status-page">Status Page</a>
+    <a href="#incident-detail">Incident Detail</a>
+    <a href="#components">Components</a>
+    <a href="#voice">Voice</a>
+  </nav>
+
+  <div class="page-wrap">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">&gt; brand-showcase.html — v1.0</div>
+        <div class="hero-title">Major<span>Ops</span><br>Brand System</div>
+        <div class="hero-tagline">WHEN SYSTEMS GO DOWN, WE STAND UP</div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-meta">GENERATED FROM BRAND.MD<br>ALL VALUES CANONICAL</div>
+        <a class="btn btn-primary" href="#">Open Incident</a>
+      </div>
+    </div>
+
+
+    <!-- ============================================================
+         LOGO
+         ============================================================ -->
+    <div class="section" id="logo">
+      <div class="section-label">01 — Identity</div>
+      <div class="section-title">Logo</div>
+      <div class="section-desc">Wordmark with a tucked prompt character. The <code style="font-family:var(--font-mono);color:var(--color-green);font-size:13px;">&gt;</code> is smaller, slightly below baseline, and dimmed in peacetime. In wartime it blinks red — the only animation in the entire UI that fires automatically.</div>
+
+      <div style="display:none;">
+
+          <!-- Option A: > as prefix, same size -->
+          <div style="background:var(--color-charcoal);border:2px solid var(--color-slate);padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-lg);">
+            <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);border-bottom:1px solid var(--color-slate);padding-bottom:var(--space-xs);">Option A — Prefix, same size</div>
+
+            <!-- Peace -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-green);font-family:var(--font-mono);">Peace Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;color:var(--color-green);margin-right:8px;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;color:var(--color-smoke);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;letter-spacing:-1px;color:var(--color-green);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; static green · calm · ready</div>
+            </div>
+
+            <!-- War -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);background:var(--color-black);padding:var(--space-md);border:1px solid var(--color-fire-red);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fire-red);font-family:var(--font-mono);">War Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;color:var(--color-fire-red);margin-right:8px;animation:blink 1.5s infinite;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;letter-spacing:4px;color:var(--color-fire-red);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;letter-spacing:-1px;color:var(--color-white);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; blinks red · incident active</div>
+            </div>
+          </div>
+
+          <!-- Option B: > smaller, superscript-ish, feels like a tag -->
+          <div style="background:var(--color-charcoal);border:2px solid var(--color-slate);padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-lg);">
+            <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);border-bottom:1px solid var(--color-slate);padding-bottom:var(--space-xs);">Option B — Smaller prompt, tucked in</div>
+
+            <!-- Peace -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-green);font-family:var(--font-mono);">Peace Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:18px;color:var(--color-green-dim);margin-right:4px;position:relative;top:2px;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;color:var(--color-smoke);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;letter-spacing:-1px;color:var(--color-green);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; subtle · dimmed green · unobtrusive</div>
+            </div>
+
+            <!-- War -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);background:var(--color-black);padding:var(--space-md);border:1px solid var(--color-fire-red);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fire-red);font-family:var(--font-mono);">War Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:18px;color:var(--color-fire-red);margin-right:4px;position:relative;top:2px;animation:blink 1.5s infinite;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;letter-spacing:4px;color:var(--color-fire-red);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;letter-spacing:-1px;color:var(--color-white);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; small blink · accent without competing</div>
+            </div>
+          </div>
+
+          <!-- Option C: > integrated, no space, reads as one word -->
+          <div style="background:var(--color-charcoal);border:2px solid var(--color-slate);padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-lg);">
+            <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);border-bottom:1px solid var(--color-slate);padding-bottom:var(--space-xs);">Option C — No space, reads as one unit</div>
+
+            <!-- Peace -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-green);font-family:var(--font-mono);">Peace Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;color:var(--color-green);">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;color:var(--color-smoke);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;letter-spacing:-1px;color:var(--color-green);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt;MAJORops · tight · command-like</div>
+            </div>
+
+            <!-- War -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);background:var(--color-black);padding:var(--space-md);border:1px solid var(--color-fire-red);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fire-red);font-family:var(--font-mono);">War Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;color:var(--color-fire-red);animation:blink 1.5s infinite;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;letter-spacing:4px;color:var(--color-fire-red);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;letter-spacing:-1px;color:var(--color-white);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; blinks · reads as executing a command</div>
+            </div>
+          </div>
+
+          <!-- Option D: No blink at all — static always, just color shift -->
+          <div style="background:var(--color-charcoal);border:2px solid var(--color-slate);padding:var(--space-lg);display:flex;flex-direction:column;gap:var(--space-lg);">
+            <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);border-bottom:1px solid var(--color-slate);padding-bottom:var(--space-xs);">Option D — No blink. Static always.</div>
+
+            <!-- Peace -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-green);font-family:var(--font-mono);">Peace Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;color:var(--color-green);margin-right:8px;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;color:var(--color-smoke);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;letter-spacing:-1px;color:var(--color-green);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; static green · no movement ever</div>
+            </div>
+
+            <!-- War -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-xs);background:var(--color-black);padding:var(--space-md);border:1px solid var(--color-fire-red);">
+              <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fire-red);font-family:var(--font-mono);">War Time</div>
+              <div style="display:inline-flex;align-items:baseline;line-height:1;">
+                <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;color:var(--color-fire-red);margin-right:8px;">&gt;</span>
+                <span style="font-family:'Orbitron',sans-serif;font-weight:900;font-size:32px;letter-spacing:4px;color:var(--color-fire-red);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:32px;letter-spacing:-1px;color:var(--color-white);">ops</span>
+              </div>
+              <div style="font-size:10px;color:var(--color-fog);font-family:var(--font-mono);">&gt; static red · color shift only</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- main logo grid -->
+      <div class="grid-3" style="margin-bottom:var(--space-xl);">
+
+        <!-- Peace Time -->
+        <div class="logo-demo-card" style="border-color:var(--color-green);grid-column:span 1;">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-green);font-family:var(--font-mono);margin-bottom:var(--space-sm);">Peace Time — All Clear</div>
+          <div class="logo peacetime lg"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+          <div class="logo-state-label" style="margin-top:var(--space-sm);">Default state. Website, nav, docs, print, everywhere.</div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-storm);margin-top:4px;">&gt; dim green static · MAJOR smoke · ops green</div>
+        </div>
+
+        <!-- War Time — Critical -->
+        <div class="logo-demo-card" style="border-color:var(--color-fire-red);background:var(--color-black);box-shadow:0 0 30px rgba(204,0,0,0.15);">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fire-red);font-family:var(--font-mono);margin-bottom:var(--space-sm);">War Time — Critical / P1</div>
+          <div class="logo wartime lg"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+          <div class="logo-state-label" style="color:var(--color-fire-red-light);margin-top:var(--space-sm);">Active incident. Fires automatically. Command engaged.</div>
+          <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-storm);margin-top:4px;">&gt; red blinking · MAJOR red heavy · ops white</div>
+        </div>
+
+        <!-- Size scale -->
+        <div class="logo-demo-card">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);font-family:var(--font-mono);margin-bottom:var(--space-md);">Size Scale</div>
+          <div style="display:flex;flex-direction:column;gap:var(--space-lg);">
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="logo peacetime lg"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-fog);">56px · Hero</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="logo peacetime md"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-fog);">32px · Nav</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="logo peacetime sm"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-fog);">20px · Compact</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;">
+              <div class="logo peacetime xs"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+              <span style="font-family:var(--font-mono);font-size:10px;color:var(--color-fog);">14px · Minimum</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- War Time severity variants -->
+        <div class="logo-demo-card" style="background:var(--color-black);">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-status-high);font-family:var(--font-mono);margin-bottom:var(--space-sm);">War Time — High / P2</div>
+          <div class="logo wartime severity-high md"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+        </div>
+
+        <div class="logo-demo-card" style="background:var(--color-black);">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-status-medium);font-family:var(--font-mono);margin-bottom:var(--space-sm);">War Time — Medium / P3</div>
+          <div class="logo wartime severity-medium md"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+        </div>
+
+        <!-- Light background -->
+        <div class="logo-demo-card" style="background:var(--color-white);">
+          <div style="font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);font-family:var(--font-mono);margin-bottom:var(--space-sm);">Light Background (Print)</div>
+          <div style="display:inline-flex;align-items:baseline;line-height:1;">
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;color:var(--color-green-dim);margin-right:4px;position:relative;top:2px;">&gt;</span>
+            <span style="font-family:'Orbitron',sans-serif;font-weight:700;font-size:32px;letter-spacing:3px;color:#1A1A1A;">MAJOR</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:32px;letter-spacing:-1px;color:#008800;">ops</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         COLOR
+         ============================================================ -->
+    <div class="section" id="color">
+      <div class="section-label">02 — Color</div>
+      <div class="section-title">Palette</div>
+      <div class="section-desc">Two brand colors. Everything else is neutral. Fire Red signals urgency. AS/400 Green signals health. Never use them as decoration — they carry meaning.</div>
+
+      <div class="swatch-group-label">Core Brand</div>
+      <div class="swatch-row">
+        <div class="swatch swatch-dark" style="background:#CC0000; flex:2;">
+          <div class="swatch-name">Fire Red</div>
+          <div class="swatch-hex">#CC0000 — Primary brand, critical, alert, CTAs</div>
+        </div>
+        <div class="swatch swatch-dark" style="background:#990000;">
+          <div class="swatch-name">Fire Red Dark</div>
+          <div class="swatch-hex">#990000</div>
+        </div>
+        <div class="swatch swatch-dark" style="background:#FF3333;">
+          <div class="swatch-name">Fire Red Light</div>
+          <div class="swatch-hex">#FF3333</div>
+        </div>
+        <div class="swatch swatch-dark" style="background:#00CC00; flex:2;">
+          <div class="swatch-name">AS/400 Green</div>
+          <div class="swatch-hex">#00CC00 — Operational, healthy, success</div>
+        </div>
+        <div class="swatch swatch-dark" style="background:#008800;">
+          <div class="swatch-name">Green Dim</div>
+          <div class="swatch-hex">#008800</div>
+        </div>
+      </div>
+
+      <div class="swatch-group-label" style="margin-top:var(--space-md);">Neutrals</div>
+      <div class="swatch-row">
+        <div class="swatch swatch-dark"  style="background:#0A0A0A; border:1px solid #2A2A2A;"><div class="swatch-name">Signal Black</div><div class="swatch-hex">#0A0A0A</div></div>
+        <div class="swatch swatch-dark"  style="background:#1A1A1A;"><div class="swatch-name">Charcoal</div><div class="swatch-hex">#1A1A1A</div></div>
+        <div class="swatch swatch-dark"  style="background:#2A2A2A;"><div class="swatch-name">Slate</div><div class="swatch-hex">#2A2A2A</div></div>
+        <div class="swatch swatch-dark"  style="background:#404040;"><div class="swatch-name">Storm</div><div class="swatch-hex">#404040</div></div>
+        <div class="swatch swatch-dark"  style="background:#808080;"><div class="swatch-name">Fog</div><div class="swatch-hex">#808080</div></div>
+        <div class="swatch swatch-light" style="background:#CCCCCC;"><div class="swatch-name">Smoke</div><div class="swatch-hex">#CCCCCC</div></div>
+        <div class="swatch swatch-light" style="background:#FFFFFF;"><div class="swatch-name">White</div><div class="swatch-hex">#FFFFFF</div></div>
+      </div>
+
+      <div class="swatch-group-label" style="margin-top:var(--space-md);">Status Semantic Colors</div>
+      <div class="swatch-row">
+        <div class="swatch swatch-dark" style="background:#CC0000;"><div class="swatch-name">Critical / P1</div><div class="swatch-hex">#CC0000</div></div>
+        <div class="swatch swatch-dark" style="background:#FF6600;"><div class="swatch-name">High / P2</div><div class="swatch-hex">#FF6600</div></div>
+        <div class="swatch swatch-dark" style="background:#FFAA00;"><div class="swatch-name">Medium / P3</div><div class="swatch-hex">#FFAA00</div></div>
+        <div class="swatch swatch-dark" style="background:#00CC00;"><div class="swatch-name">Low / P4</div><div class="swatch-hex">#00CC00</div></div>
+        <div class="swatch swatch-dark" style="background:#FFAA00;"><div class="swatch-name">Monitoring</div><div class="swatch-hex">#FFAA00</div></div>
+        <div class="swatch swatch-dark" style="background:#00CC00;"><div class="swatch-name">Resolved</div><div class="swatch-hex">#00CC00</div></div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         TYPOGRAPHY
+         ============================================================ -->
+    <div class="section" id="typography">
+      <div class="section-label">03 — Typography</div>
+      <div class="section-title">Type System</div>
+      <div class="section-desc">Three fonts, three purposes. IBM Plex Mono for display and identity. Saira Condensed for headers — space-efficient and fast to read under stress. IBM Plex Sans for body and UI.</div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">Display</div>
+          <div class="type-meta-detail">Orbitron 900 + IBM Plex Mono 400<br>56px · Logo wordmark</div>
+        </div>
+        <div class="type-sample">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:26px;color:var(--color-fire-red);margin-right:5px;position:relative;top:3px;animation:blink 1.5s infinite;">&gt;</span><span style="font-family:'Orbitron',sans-serif;font-weight:900;letter-spacing:4px;font-size:48px;color:var(--color-fire-red);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:48px;letter-spacing:-1px;color:var(--color-white);">ops</span>
+          <span style="display:block;margin-top:8px;"><span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:26px;color:var(--color-green-dim);margin-right:5px;position:relative;top:3px;">&gt;</span><span style="font-family:'Orbitron',sans-serif;font-weight:700;letter-spacing:3px;font-size:48px;color:var(--color-smoke);">MAJOR</span><span style="font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:48px;letter-spacing:-1px;color:var(--color-green);">ops</span></span>
+        </div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">H1</div>
+          <div class="type-meta-detail">Saira Condensed 800<br>32px / 2px tracking / UPPERCASE</div>
+        </div>
+        <div class="type-sample" style="font-family:'Saira Condensed',sans-serif;font-size:32px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#fff;">Storage Service Regional Failure</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">H2</div>
+          <div class="type-meta-detail">Saira Condensed 700<br>24px / 1px tracking / UPPERCASE</div>
+        </div>
+        <div class="type-sample" style="font-family:'Saira Condensed',sans-serif;font-size:24px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;">Active Incidents</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">H3</div>
+          <div class="type-meta-detail">Saira Condensed 700<br>18px / 1px tracking / UPPERCASE</div>
+        </div>
+        <div class="type-sample" style="font-family:'Saira Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff;">Phase 3 — Assess</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">Body Large</div>
+          <div class="type-meta-detail">IBM Plex Sans 400<br>16px / normal</div>
+        </div>
+        <div class="type-sample" style="font-family:'IBM Plex Sans',sans-serif;font-size:16px;color:#CCCCCC;">S3-compatible storage service in US-EAST region reporting elevated error rates across all availability zones.</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">Body</div>
+          <div class="type-meta-detail">IBM Plex Sans 400<br>14px / normal</div>
+        </div>
+        <div class="type-sample" style="font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:#CCCCCC;">Object retrieval failures affecting media delivery and user uploads. MIM assigned. Bridge active.</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">Small</div>
+          <div class="type-meta-detail">IBM Plex Sans 400<br>12px / 1px tracking</div>
+        </div>
+        <div class="type-sample" style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;letter-spacing:1px;color:#808080;">Last updated 12:00:05 AM — Click for detailed incident timeline and updates</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">Micro Label</div>
+          <div class="type-meta-detail">IBM Plex Sans 600<br>10px / 3px tracking / UPPERCASE</div>
+        </div>
+        <div class="type-sample" style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#808080;">Current Phase &nbsp;·&nbsp; Duration &nbsp;·&nbsp; Affected Users</div>
+      </div>
+
+      <div class="type-row">
+        <div class="type-meta">
+          <div class="type-meta-name">Mono / Terminal</div>
+          <div class="type-meta-detail">IBM Plex Mono 400<br>13px</div>
+        </div>
+        <div class="type-sample" style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#00CC00;">&gt; mim new storage-failure --severity critical --summary "US-EAST storage down"<br><span style="color:#CCCCCC;">Incident #3 opened. Bridge active. MIM notified.</span></div>
+      </div>
+
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         BADGES
+         ============================================================ -->
+    <div class="section" id="badges">
+      <div class="section-label">04 — Components</div>
+      <div class="section-title">Badges & Status</div>
+
+      <div style="margin-bottom: var(--space-lg);">
+        <div class="section-desc" style="margin-bottom:var(--space-md);">Severity badges — outline only, no fill. Color carries meaning.</div>
+        <div class="flex-row">
+          <span class="badge badge-critical"><span class="badge-dot critical"></span>Critical</span>
+          <span class="badge badge-high"><span class="badge-dot high"></span>High</span>
+          <span class="badge badge-medium"><span class="badge-dot medium"></span>Medium</span>
+          <span class="badge badge-low"><span class="badge-dot low"></span>Low</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--space-lg);">
+        <div class="section-desc" style="margin-bottom:var(--space-md);">Status badges</div>
+        <div class="flex-row">
+          <span class="badge badge-active"><span class="badge-dot active"></span>Active</span>
+          <span class="badge badge-monitoring"><span class="badge-dot monitoring"></span>Monitoring</span>
+          <span class="badge badge-resolved"><span class="badge-dot resolved"></span>Resolved</span>
+          <span class="badge badge-neutral">Incident #3</span>
+          <span class="badge badge-neutral">Critical Duration</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: var(--space-lg);">
+        <div class="section-desc" style="margin-bottom:var(--space-md);">Buttons</div>
+        <div class="flex-row">
+          <a class="btn btn-primary" href="#">Open Incident</a>
+          <a class="btn btn-primary" href="#">Advance Phase</a>
+          <a class="btn btn-ghost" href="#">View Timeline</a>
+          <a class="btn btn-green" href="#">Join Bridge</a>
+          <a class="btn btn-danger" href="#">Resolve</a>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         PHASE BAR
+         ============================================================ -->
+    <div class="section" id="phases">
+      <div class="section-label">05 — Phase Bar</div>
+      <div class="section-title">Incident Phases</div>
+      <div class="section-desc">Hard-edged chevrons. Green = completed. Current phase color matches incident severity. Gray = not yet reached. CSS clip-path only — no images.</div>
+
+      <div class="phase-bar-wrap">
+        <div class="phase-bar-label">Critical — Phase 3 Active</div>
+        <div class="phase-bar">
+          <div class="phase-step completed">Alert</div>
+          <div class="phase-step completed">Gather</div>
+          <div class="phase-step current">Assess</div>
+          <div class="phase-step future">Initial</div>
+          <div class="phase-step future">Isolation</div>
+          <div class="phase-step future">Mitigation</div>
+          <div class="phase-step future">Validation</div>
+          <div class="phase-step future">Resolution</div>
+        </div>
+      </div>
+
+      <div class="phase-bar-wrap">
+        <div class="phase-bar-label">High — Phase 5 Active</div>
+        <div class="phase-bar">
+          <div class="phase-step completed">Alert</div>
+          <div class="phase-step completed">Gather</div>
+          <div class="phase-step completed">Assess</div>
+          <div class="phase-step completed">Initial</div>
+          <div class="phase-step current severity-high">Isolation</div>
+          <div class="phase-step future">Mitigation</div>
+          <div class="phase-step future">Validation</div>
+          <div class="phase-step future">Resolution</div>
+        </div>
+      </div>
+
+      <div class="phase-bar-wrap">
+        <div class="phase-bar-label">Medium — Phase 7 Active</div>
+        <div class="phase-bar">
+          <div class="phase-step completed">Alert</div>
+          <div class="phase-step completed">Gather</div>
+          <div class="phase-step completed">Assess</div>
+          <div class="phase-step completed">Initial</div>
+          <div class="phase-step completed">Isolation</div>
+          <div class="phase-step completed">Mitigation</div>
+          <div class="phase-step current severity-medium">Validation</div>
+          <div class="phase-step future">Resolution</div>
+        </div>
+      </div>
+
+      <div class="phase-bar-wrap">
+        <div class="phase-bar-label">Resolved — All Phases Complete</div>
+        <div class="phase-bar">
+          <div class="phase-step completed">Alert</div>
+          <div class="phase-step completed">Gather</div>
+          <div class="phase-step completed">Assess</div>
+          <div class="phase-step completed">Initial</div>
+          <div class="phase-step completed">Isolation</div>
+          <div class="phase-step completed">Mitigation</div>
+          <div class="phase-step completed">Validation</div>
+          <div class="phase-step completed">Resolution</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         STATUS PAGE MOCK
+         ============================================================ -->
+    <div class="section" id="status-page">
+      <div class="section-label">06 — Executive View</div>
+      <div class="section-title">Status Page — majorops.io</div>
+      <div class="section-desc">The homepage. No auth. Anyone in the org opens this URL and immediately knows the state of the world. Atlassian StatusPage-style but purpose-built for internal ops teams.</div>
+
+      <div class="status-page-mock">
+
+        <div class="mock-topbar">
+          <div class="logo wartime sm"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+          <a class="btn btn-primary" href="#" style="margin-left:auto;">MIM Dashboard</a>
+        </div>
+
+        <div class="mock-content">
+
+          <!-- Status Banner -->
+          <div class="status-banner">
+            <div class="status-banner-left">
+              <div class="status-banner-icon">⚠</div>
+              <div>
+                <div class="status-banner-title">Major Outage</div>
+                <div class="status-banner-time">⏱ Last updated: 2/28/2026, 10:23:37 AM</div>
+              </div>
+            </div>
+            <div class="status-banner-counts">
+              <div class="status-count-box">
+                <div class="status-count-num">4</div>
+                <div class="status-count-label">Incidents</div>
+              </div>
+              <div class="status-count-box count-critical">
+                <div class="status-count-num">1</div>
+                <div class="status-count-label">Critical</div>
+              </div>
+              <div class="status-count-box count-high">
+                <div class="status-count-num">2</div>
+                <div class="status-count-label">High</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Incidents Header -->
+          <div class="mock-section-header">
+            <div class="mock-section-title">
+              <span style="color:var(--color-status-high);">⚠</span>
+              Active Incidents
+            </div>
+            <div class="mock-section-count">4 incidents in progress</div>
+          </div>
+
+          <!-- Incident Card 1 -->
+          <div class="incident-card card-accent-amber">
+            <div class="incident-card-header">
+              <span class="badge badge-medium"><span class="badge-dot medium"></span>Medium</span>
+              <span class="badge badge-active" style="font-size:9px;padding:2px 6px;border-color:var(--color-status-high);color:var(--color-status-high);">⏱ Critical Duration</span>
+              <span class="badge badge-neutral">Incident #3</span>
+              <div class="chevron-right" style="margin-left:auto;"></div>
+            </div>
+            <div class="incident-card-body">
+              <div class="incident-title">Storage Service Regional Failure</div>
+              <div class="incident-description">S3-compatible storage service in US-EAST region reporting elevated error rates.</div>
+              <div class="incident-stats">
+                <div class="incident-stat">
+                  <div class="incident-stat-label">↗ Current Phase</div>
+                  <div class="incident-stat-value">Assess</div>
+                  <div class="incident-stat-sub">Entered 6:10:40 PM</div>
+                </div>
+                <div class="incident-stat stat-duration">
+                  <div class="incident-stat-label">⏱ Duration</div>
+                  <div class="incident-stat-value">17h 12m</div>
+                  <div class="incident-stat-sub">Started 5:10:40 PM</div>
+                </div>
+                <div class="incident-stat">
+                  <div class="incident-stat-label">👥 Impact</div>
+                  <div class="incident-stat-value">1,200</div>
+                  <div class="incident-stat-sub">Unknown</div>
+                </div>
+                <div class="incident-stat">
+                  <div class="incident-stat-label">🛡 Systems</div>
+                  <div class="incident-stat-value" style="font-size:13px;line-height:1.3;">Object Storage, CDN, Media Pipeline</div>
+                  <div class="incident-stat-sub">Affected infrastructure</div>
+                </div>
+              </div>
+            </div>
+            <div class="incident-card-footer">
+              <div class="incident-card-footer-left">↗ Click for detailed incident timeline and updates</div>
+              <div class="incident-card-footer-right">Last updated: 12:00:05 AM</div>
+            </div>
+          </div>
+
+          <!-- Incident Card 2 -->
+          <div class="incident-card card-accent-orange">
+            <div class="incident-card-header">
+              <span class="badge badge-high"><span class="badge-dot high"></span>High</span>
+              <span class="badge badge-active" style="font-size:9px;padding:2px 6px;border-color:var(--color-status-high);color:var(--color-status-high);">⏱ Critical Duration</span>
+              <span class="badge badge-neutral">Incident #4</span>
+              <div class="chevron-right" style="margin-left:auto;"></div>
+            </div>
+            <div class="incident-card-body">
+              <div class="incident-title">Database Performance Degradation — Primary Cluster</div>
+              <div class="incident-description">Primary database cluster experiencing high CPU utilization. Queries are taking 3-5x longer than normal.</div>
+              <div class="incident-stats">
+                <div class="incident-stat">
+                  <div class="incident-stat-label">↗ Current Phase</div>
+                  <div class="incident-stat-value">Isolation</div>
+                  <div class="incident-stat-sub">Entered 12:04:15 AM</div>
+                </div>
+                <div class="incident-stat stat-duration">
+                  <div class="incident-stat-label">⏱ Duration</div>
+                  <div class="incident-stat-value">18h 20m</div>
+                  <div class="incident-stat-sub">Started 4:03:11 PM</div>
+                </div>
+                <div class="incident-stat stat-impact" style="border:1px solid rgba(204,0,0,0.4); background:rgba(204,0,0,0.08);">
+                  <div class="incident-stat-label">👥 Impact</div>
+                  <div class="incident-stat-value">1,200</div>
+                  <div class="incident-stat-sub" style="color:var(--color-fire-red-light);">Yes — External</div>
+                </div>
+                <div class="incident-stat">
+                  <div class="incident-stat-label">🛡 Systems</div>
+                  <div class="incident-stat-value" style="font-size:13px;line-height:1.3;">PostgreSQL Primary, API Services</div>
+                  <div class="incident-stat-sub">Affected infrastructure</div>
+                </div>
+              </div>
+            </div>
+            <div class="incident-card-footer">
+              <div class="incident-card-footer-left">↗ Click for detailed incident timeline and updates</div>
+              <div class="incident-card-footer-right">Last updated: 12:04:15 AM</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         INCIDENT DETAIL MOCK
+         ============================================================ -->
+    <div class="section" id="incident-detail">
+      <div class="section-label">07 — Fireground View</div>
+      <div class="section-title">Incident Detail — Three Sticky Bars</div>
+      <div class="section-desc">The MIM's working environment. Three bars are always present regardless of scroll position: top nav (incident context), phase bar (where we are), bottom stats (live numbers). Everything between them scrolls.</div>
+
+      <div class="detail-mock">
+
+        <!-- TOP BAR -->
+        <div class="detail-bar-top">
+          <div class="back-btn">
+            <div class="back-chevron"></div>
+            Back
+          </div>
+          <div class="detail-incident-title">#3 Storage Service Regional Failure</div>
+          <span class="badge badge-medium" style="flex-shrink:0;"><span class="badge-dot medium"></span>Medium</span>
+          <span class="badge badge-active" style="flex-shrink:0;"><span class="badge-dot active"></span>Active</span>
+        </div>
+
+        <!-- PHASE BAR -->
+        <div class="detail-bar-phase">
+          <div class="phase-bar" style="gap:1px;">
+            <div class="phase-step completed" style="padding:8px 4px;font-size:11px;">Alert</div>
+            <div class="phase-step completed" style="padding:8px 4px;font-size:11px;">Gather</div>
+            <div class="phase-step current" style="padding:8px 4px;font-size:11px;">Assess</div>
+            <div class="phase-step future" style="padding:8px 4px;font-size:11px;">Initial</div>
+            <div class="phase-step future" style="padding:8px 4px;font-size:11px;">Isolation</div>
+            <div class="phase-step future" style="padding:8px 4px;font-size:11px;">Mitigation</div>
+            <div class="phase-step future" style="padding:8px 4px;font-size:11px;">Validation</div>
+            <div class="phase-step future" style="padding:8px 4px;font-size:11px;">Resolution</div>
+          </div>
+        </div>
+
+        <!-- SCROLLABLE CONTENT -->
+        <div class="detail-content">
+          <div class="grid-2" style="gap:var(--space-md); margin-bottom:var(--space-md);">
+            <div class="card">
+              <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:var(--space-xs);">Latest Status Update</div>
+              <div style="font-size:13px;color:var(--color-smoke);">Investigation ongoing, working to resolve the issue. Storage service still reporting errors in US-EAST.</div>
+              <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-fog);margin-top:var(--space-sm);">2/27/2026, 6:40:40 PM</div>
+            </div>
+            <div class="card">
+              <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:var(--space-xs);">Incident Command</div>
+              <div style="display:flex;flex-direction:column;gap:var(--space-xs);">
+                <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--color-fog);">MIM</span><span style="color:var(--color-white);">Ronnie M.</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--color-fog);">SRE</span><span style="color:var(--color-fog);">Unassigned</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;"><span style="color:var(--color-fog);">Leader</span><span style="color:var(--color-fog);">Unassigned</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:center;color:var(--color-storm);font-size:12px;padding:var(--space-lg) 0;letter-spacing:1px;">
+            ↕ Scrollable content — phase logs, status history, recovery paths, validation tracking
+          </div>
+        </div>
+
+        <!-- BOTTOM BAR -->
+        <div class="detail-bar-bottom">
+          <div class="detail-bottom-stat">
+            <div class="stat-num" style="color:var(--color-status-high);">17h 13m</div>
+            <div class="stat-lbl">Total Duration</div>
+          </div>
+          <div class="detail-bottom-stat">
+            <div class="stat-num">1,200</div>
+            <div class="stat-lbl">Affected Users</div>
+          </div>
+          <div class="detail-bottom-stat">
+            <div class="stat-num" style="color:var(--color-status-critical);">3/8</div>
+            <div class="stat-lbl">Current Phase</div>
+          </div>
+          <div class="detail-bottom-stat">
+            <div class="stat-num">3</div>
+            <div class="stat-lbl">Updates Posted</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         COMPONENTS
+         ============================================================ -->
+    <div class="section" id="components">
+      <div class="section-label">08 — Components</div>
+      <div class="section-title">Cards & Terminal</div>
+
+      <div class="grid-2" style="margin-bottom:var(--space-xl);">
+        <div>
+          <div class="section-desc" style="margin-bottom:var(--space-md);">Card variants — left border signals context</div>
+          <div class="flex-col">
+            <div class="card card-accent-red">
+              <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:4px;">Alert Information</div>
+              <div style="font-size:14px;color:var(--color-white);">Alert ID: ALT-7018 · Customers: 1,200</div>
+            </div>
+            <div class="card card-accent-green">
+              <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:4px;">Recovery Validated</div>
+              <div style="font-size:14px;color:var(--color-white);">All systems reporting nominal. Validation complete.</div>
+            </div>
+            <div class="card card-accent-amber">
+              <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:4px;">Monitoring</div>
+              <div style="font-size:14px;color:var(--color-white);">Error rates declining. Watching for recurrence.</div>
+            </div>
+            <div class="card">
+              <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:4px;">Standard Card</div>
+              <div style="font-size:14px;color:var(--color-smoke);">Default surface for content blocks, detail panels, and data displays.</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-desc" style="margin-bottom:var(--space-md);">Terminal block — CLI and code output</div>
+          <div class="terminal-block">
+            <div><span class="terminal-prompt">$</span> <span class="terminal-cmd">mim new storage-failure \</span></div>
+            <div style="padding-left:16px;"><span class="terminal-cmd">--severity critical \</span></div>
+            <div style="padding-left:16px;"><span class="terminal-cmd">--summary "US-EAST storage down"</span></div>
+            <br>
+            <div><span class="terminal-out">✓ Incident #5 opened</span></div>
+            <div><span class="terminal-out">✓ MIM notified — Ronnie M.</span></div>
+            <div><span class="terminal-out">✓ Bridge active</span></div>
+            <br>
+            <div><span class="terminal-dim">ID: 01HXZM9K3P · Severity: CRITICAL · Phase: 1/8</span></div>
+            <br>
+            <div><span class="terminal-prompt">$</span> <span class="terminal-cmd">mim update 5 "Storage restored in us-east-1a. Monitoring other zones."</span></div>
+            <br>
+            <div><span class="terminal-out">✓ Update posted to Incident #5</span></div>
+            <div><span class="terminal-err">⚠ No exec brief sent — no escalation contacts set</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         ANIMATION
+         ============================================================ -->
+    <div class="section">
+      <div class="section-label">09 — Motion</div>
+      <div class="section-title">Animations</div>
+      <div class="section-desc">Two animations only. Blink for terminal/identity. Pulse for live status indicators. P1 incidents pulse faster — the interface expresses urgency without saying a word.</div>
+
+      <div class="flex-col">
+        <div class="anim-demo">
+          <div class="anim-label">Cursor Blink — 1.5s</div>
+          <div class="blink-cursor">&gt;</div>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--color-fog);margin-left:auto;">Logo mark · Terminal elements</div>
+        </div>
+        <div class="anim-demo">
+          <div class="anim-label">Status Pulse — 2s</div>
+          <div class="pulse-dot-lg"></div>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--color-fog);margin-left:auto;">Operational/healthy live indicators</div>
+        </div>
+        <div class="anim-demo" style="border:1px solid rgba(204,0,0,0.3);">
+          <div class="anim-label" style="color:var(--color-fire-red-light);">P1 Pulse — 0.8s</div>
+          <div class="pulse-dot-critical"></div>
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--color-fog);margin-left:auto;">Critical incident active — logo border · alert dot</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider" />
+
+
+    <!-- ============================================================
+         VOICE
+         ============================================================ -->
+    <div class="section" id="voice">
+      <div class="section-label">10 — Voice</div>
+      <div class="section-title">Tone & Copy Rules</div>
+
+      <div class="grid-2" style="gap:var(--space-xl);">
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-green);margin-bottom:var(--space-md);">✓ Do</div>
+          <div class="flex-col">
+            <div class="card card-accent-green" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-white);">"Incident resolved. Duration: 2h 14m."</div>
+            </div>
+            <div class="card card-accent-green" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-white);">"3 systems affected. P1. MIM assigned."</div>
+            </div>
+            <div class="card card-accent-green" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-white);">"Phase 6 — Mitigation underway."</div>
+            </div>
+            <div class="card card-accent-green" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-white);">"No active incidents."</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fire-red);margin-bottom:var(--space-md);">✗ Don't</div>
+          <div class="flex-col">
+            <div class="card card-accent-red" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-smoke);text-decoration:line-through;">"We're excited to announce full restoration!"</div>
+            </div>
+            <div class="card card-accent-red" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-smoke);text-decoration:line-through;">"We are experiencing some issues at this time."</div>
+            </div>
+            <div class="card card-accent-red" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-smoke);text-decoration:line-through;">"Our team is working hard to fix this."</div>
+            </div>
+            <div class="card card-accent-red" style="padding:var(--space-md);">
+              <div style="font-family:var(--font-mono);font-size:13px;color:var(--color-smoke);text-decoration:line-through;">"Everything looks good on our end!"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:var(--space-xl);">
+        <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);margin-bottom:var(--space-md);">Taglines</div>
+        <div style="font-family:var(--font-heading);font-size:32px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--color-white);margin-bottom:var(--space-md);">WHEN SYSTEMS GO DOWN, WE STAND UP</div>
+        <div style="font-family:var(--font-heading);font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--color-fog);">COMMAND BY DESIGN. CALM UNDER PRESSURE.</div>
+      </div>
+    </div>
+
+
+    <!-- FOOTER -->
+    <div style="border-top:1px solid var(--color-slate);padding-top:var(--space-xl);margin-top:var(--space-xl);display:flex;align-items:center;justify-content:space-between;">
+      <div class="logo peacetime md"><span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span></div>
+      <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-storm);text-align:right;">
+        BRAND.MD → BRAND-SHOWCASE.HTML<br>
+        ALL VALUES SOURCED FROM BRAND.MD / BRAND.CSS
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

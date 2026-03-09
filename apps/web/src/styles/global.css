@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    border-radius: 0 !important;
+    box-sizing: border-box;
+  }
+
+  html {
+    background-color: #0A0A0A;
+    color: rgba(242, 242, 242, 0.87);
+  }
+
+  body {
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0A0A0A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #2A2A2A;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #CC0000;
+  }
+
+  /* Selection */
+  ::selection {
+    background: rgba(204, 0, 0, 0.3);
+    color: #FFFFFF;
+  }
+}
+
+@layer components {
+  /* Scanline overlay — subtle CRT texture on the header */
+  .scanlines::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+@layer utilities {
+  .font-700 { font-weight: 700; }
+  .font-900 { font-weight: 900; }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+}

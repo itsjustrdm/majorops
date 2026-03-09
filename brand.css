@@ -1,0 +1,654 @@
+/**
+ * MajorOps — brand.css
+ *
+ * This file is the single source of truth for all visual tokens.
+ * Import this once at the top of your stylesheet or main entry point.
+ * Never hardcode hex values or font names in components — always use these variables.
+ *
+ * Generated from BRAND.md
+ */
+
+/* ============================================================
+   GOOGLE FONTS IMPORT
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700;800;900&family=Orbitron:wght@400;500;700;900&display=swap');
+
+
+/* ============================================================
+   ROOT TOKENS
+   ============================================================ */
+
+:root {
+
+  /* ----------------------------------------------------------
+     COLORS — Core Palette
+     ---------------------------------------------------------- */
+
+  --color-fire-red:        #CC0000;
+  --color-fire-red-dark:   #990000;
+  --color-fire-red-light:  #FF3333;
+
+  --color-green:           #00CC00;
+  --color-green-bright:    #00FF00;
+  --color-green-dim:       #008800;
+
+  --color-black:           #0A0A0A;
+  --color-white:           #FFFFFF;
+
+  /* ----------------------------------------------------------
+     COLORS — Gray Scale
+     ---------------------------------------------------------- */
+
+  --color-charcoal:        #1A1A1A;
+  --color-slate:           #2A2A2A;
+  --color-storm:           #404040;
+  --color-fog:             #808080;
+  --color-smoke:           #CCCCCC;
+  --color-paper:           #F5F5F5;
+
+  /* ----------------------------------------------------------
+     COLORS — Status / Semantic
+     ---------------------------------------------------------- */
+
+  --color-status-critical:   #CC0000;   /* P1 — Fire Red */
+  --color-status-high:       #FF6600;   /* P2 — Orange */
+  --color-status-medium:     #FFAA00;   /* P3 — Amber */
+  --color-status-low:        #00CC00;   /* P4 — Green */
+
+  --color-status-active:     #CC0000;   /* Incident active */
+  --color-status-monitoring: #FFAA00;   /* Incident monitoring */
+  --color-status-resolved:   #00CC00;   /* Incident resolved */
+
+  /* ----------------------------------------------------------
+     COLORS — Surface (Dark Mode — Default)
+     ---------------------------------------------------------- */
+
+  --surface-page:          var(--color-black);      /* Page background */
+  --surface-card:          var(--color-charcoal);   /* Card background */
+  --surface-raised:        var(--color-slate);      /* Elevated surface */
+  --surface-overlay:       rgba(0, 0, 0, 0.6);      /* Modal/overlay */
+
+  /* ----------------------------------------------------------
+     COLORS — Text
+     ---------------------------------------------------------- */
+
+  --text-primary:          var(--color-white);
+  --text-secondary:        var(--color-smoke);
+  --text-muted:            var(--color-fog);
+  --text-disabled:         var(--color-storm);
+  --text-accent-red:       var(--color-fire-red);
+  --text-accent-green:     var(--color-green);
+
+  /* ----------------------------------------------------------
+     COLORS — Border
+     ---------------------------------------------------------- */
+
+  --border-default:        var(--color-slate);      /* 1px — default card border */
+  --border-accent:         var(--color-fire-red);   /* 2px — section accents */
+  --border-terminal:       var(--color-green);      /* 2px — terminal elements */
+  --border-critical:       var(--color-fire-red);
+  --border-logo:           var(--color-green);      /* 3px — logo icon border */
+
+  /* ----------------------------------------------------------
+     TYPOGRAPHY — Font Families
+     ---------------------------------------------------------- */
+
+  --font-display:   'Orbitron', sans-serif;
+  --font-heading:   'Saira Condensed', sans-serif;
+  --font-body:      'IBM Plex Sans', sans-serif;
+  --font-mono:      'IBM Plex Mono', monospace;
+
+  /* ----------------------------------------------------------
+     TYPOGRAPHY — Scale
+     ---------------------------------------------------------- */
+
+  --text-display:   48px;
+  --text-h1:        32px;
+  --text-h2:        24px;
+  --text-h3:        18px;
+  --text-body-lg:   16px;
+  --text-body:      14px;
+  --text-small:     12px;
+  --text-micro:     10px;
+
+  /* ----------------------------------------------------------
+     TYPOGRAPHY — Weights
+     ---------------------------------------------------------- */
+
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-extrabold: 800;
+
+  /* ----------------------------------------------------------
+     TYPOGRAPHY — Tracking (Letter Spacing)
+     ---------------------------------------------------------- */
+
+  --tracking-tight:    -1px;   /* Logo wordmark */
+  --tracking-normal:    0px;   /* Body text */
+  --tracking-wide:      1px;   /* Labels, small text */
+  --tracking-wider:     2px;   /* Uppercase labels, display */
+  --tracking-widest:    3px;   /* Micro tags */
+
+  /* ----------------------------------------------------------
+     TYPOGRAPHY — Line Height
+     ---------------------------------------------------------- */
+
+  --leading-tight:    1.1;   /* Display, hero numbers */
+  --leading-heading:  1.3;   /* Headers */
+  --leading-body:     1.6;   /* Body copy */
+  --leading-relaxed:  1.8;   /* Long-form content */
+
+  /* ----------------------------------------------------------
+     BORDERS
+     Note: border-radius is intentionally absent.
+     MajorOps uses hard edges only.
+     ---------------------------------------------------------- */
+
+  --border-width-thin:   1px;
+  --border-width-base:   2px;
+  --border-width-thick:  3px;
+  --border-width-heavy:  4px;
+
+  --radius: 0px; /* Hard rule: no border radius. This exists to be explicit. */
+
+  /* ----------------------------------------------------------
+     SHADOWS
+     ---------------------------------------------------------- */
+
+  --shadow-card:     0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 8px 24px rgba(0, 0, 0, 0.3);
+
+  /* ----------------------------------------------------------
+     SPACING — 8px Base Grid
+     ---------------------------------------------------------- */
+
+  --space-2xs:  4px;
+  --space-xs:   8px;
+  --space-sm:   12px;
+  --space-md:   16px;
+  --space-lg:   24px;
+  --space-xl:   32px;
+  --space-2xl:  48px;
+  --space-3xl:  64px;
+  --space-4xl:  80px;
+
+  /* ----------------------------------------------------------
+     LAYOUT
+     ---------------------------------------------------------- */
+
+  --layout-max-width:       1200px;
+  --layout-page-padding-xs: var(--space-lg);   /* 24px — mobile */
+  --layout-page-padding-sm: var(--space-2xl);  /* 48px — tablet */
+  --layout-page-padding-lg: var(--space-4xl);  /* 80px — desktop */
+  --layout-card-padding:    var(--space-lg);   /* 24px */
+  --layout-section-gap:     var(--space-xl);   /* 32px */
+  --layout-component-gap:   var(--space-md);   /* 16px */
+
+  /* ----------------------------------------------------------
+     ANIMATION DURATIONS
+     ---------------------------------------------------------- */
+
+  --duration-blink: 1.5s;
+  --duration-pulse: 2s;
+  --duration-fast:  0.15s;
+  --duration-base:  0.3s;
+
+}
+
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+/* Cursor blink — logo ">" and terminal elements */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* Status pulse — live/active dot indicators only */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.2); opacity: 0.7; }
+}
+
+
+/* ============================================================
+   BASE RESET
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius); /* Enforces hard edges globally */
+}
+
+html {
+  background-color: var(--surface-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* ============================================================
+   TYPOGRAPHY — BASE ELEMENTS
+   ============================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wide);
+}
+
+h1 { font-size: var(--text-h1); letter-spacing: var(--tracking-wider); }
+h2 { font-size: var(--text-h2); letter-spacing: var(--tracking-wide); }
+h3 { font-size: var(--text-h3); }
+
+p {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--text-secondary);
+  line-height: var(--leading-body);
+}
+
+code, pre, .mono {
+  font-family: var(--font-mono);
+}
+
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+/* Text colors */
+.text-primary    { color: var(--text-primary); }
+.text-secondary  { color: var(--text-secondary); }
+.text-muted      { color: var(--text-muted); }
+.text-red        { color: var(--text-accent-red); }
+.text-green      { color: var(--text-accent-green); }
+
+/* Status text colors */
+.text-critical   { color: var(--color-status-critical); }
+.text-high       { color: var(--color-status-high); }
+.text-medium     { color: var(--color-status-medium); }
+.text-low        { color: var(--color-status-low); }
+
+/* Label style (uppercase micro) */
+.label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Mono / terminal text */
+.terminal {
+  font-family: var(--font-mono);
+  font-size: var(--text-body);
+  color: var(--color-green);
+  line-height: var(--leading-body);
+}
+
+/* Blinking cursor */
+.cursor-blink {
+  animation: blink var(--duration-blink) infinite;
+}
+
+/* Live pulse indicator */
+.pulse-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: var(--color-green);
+  animation: pulse var(--duration-pulse) ease-in-out infinite;
+}
+
+.pulse-dot.critical {
+  background-color: var(--color-fire-red);
+}
+
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2xs) var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  border-width: var(--border-width-thin);
+  border-style: solid;
+}
+
+.badge-critical  { color: var(--color-status-critical);  border-color: var(--color-status-critical); }
+.badge-high      { color: var(--color-status-high);      border-color: var(--color-status-high); }
+.badge-medium    { color: var(--color-status-medium);    border-color: var(--color-status-medium); }
+.badge-low       { color: var(--color-status-low);       border-color: var(--color-status-low); }
+.badge-active    { color: var(--color-status-active);    border-color: var(--color-status-active); }
+.badge-monitoring{ color: var(--color-status-monitoring);border-color: var(--color-status-monitoring); }
+.badge-resolved  { color: var(--color-status-resolved);  border-color: var(--color-status-resolved); }
+
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+
+.card {
+  background-color: var(--surface-card);
+  border: var(--border-width-thin) solid var(--border-default);
+  padding: var(--layout-card-padding);
+  box-shadow: var(--shadow-card);
+}
+
+.card-accent-red {
+  border-left: var(--border-width-heavy) solid var(--color-fire-red);
+}
+
+.card-accent-green {
+  border-left: var(--border-width-heavy) solid var(--color-green);
+}
+
+
+/* ============================================================
+   PHASE BAR
+   ============================================================ */
+
+.phase-bar {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 2px;
+  background-color: var(--surface-page);
+  padding: var(--space-xs) 0;
+}
+
+.phase-step {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  position: relative;
+
+  /* Chevron shape */
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
+}
+
+.phase-step:first-child {
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%);
+}
+
+.phase-step:last-child {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 12px 50%);
+}
+
+/* Phase states */
+.phase-step.completed {
+  background-color: var(--color-green-dim);
+  color: var(--color-green);
+}
+
+.phase-step.current {
+  background-color: var(--color-fire-red-dark);
+  color: var(--color-white);
+}
+
+.phase-step.current.severity-high {
+  background-color: #CC4400;
+}
+
+.phase-step.current.severity-medium {
+  background-color: #886600;
+  color: var(--color-status-medium);
+}
+
+.phase-step.future {
+  background-color: var(--color-storm);
+  color: var(--color-fog);
+}
+
+
+/* ============================================================
+   STICKY BARS (Incident Detail)
+   ============================================================ */
+
+.bar-top {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  background-color: var(--color-black);
+  border-bottom: var(--border-width-thin) solid var(--border-default);
+}
+
+.bar-phase {
+  position: sticky;
+  top: 48px; /* height of bar-top */
+  z-index: 99;
+  background-color: var(--color-black);
+  border-bottom: var(--border-width-thin) solid var(--border-default);
+  padding: var(--space-xs) var(--space-lg);
+}
+
+.bar-bottom {
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background-color: var(--color-charcoal);
+  border-top: var(--border-width-base) solid var(--border-default);
+}
+
+.bar-bottom-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-sm) var(--space-md);
+  border-right: var(--border-width-thin) solid var(--border-default);
+}
+
+.bar-bottom-stat:last-child {
+  border-right: none;
+}
+
+.bar-bottom-stat .stat-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.bar-bottom-stat .stat-label {
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: var(--space-2xs);
+}
+
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-lg);
+  font-family: var(--font-body);
+  font-size: var(--text-small);
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  border: var(--border-width-thin) solid transparent;
+  transition: background-color var(--duration-fast), color var(--duration-fast), border-color var(--duration-fast);
+}
+
+.btn-primary {
+  background-color: var(--color-fire-red);
+  color: var(--color-white);
+  border-color: var(--color-fire-red);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-fire-red-dark);
+  border-color: var(--color-fire-red-dark);
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.btn-ghost:hover {
+  border-color: var(--color-fire-red);
+  color: var(--color-fire-red);
+}
+
+
+/* ============================================================
+   PAGE LAYOUT
+   ============================================================ */
+
+.page {
+  max-width: var(--layout-max-width);
+  margin: 0 auto;
+  padding: var(--space-2xl) var(--layout-page-padding-xs);
+}
+
+@media (min-width: 640px) {
+  .page { padding-left: var(--layout-page-padding-sm); padding-right: var(--layout-page-padding-sm); }
+}
+
+@media (min-width: 1024px) {
+  .page { padding-left: var(--layout-page-padding-lg); padding-right: var(--layout-page-padding-lg); }
+}
+
+.section {
+  margin-bottom: var(--layout-section-gap);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-xs);
+  border-bottom: var(--border-width-base) solid var(--border-default);
+}
+
+
+/* ============================================================
+   LOGO MARK
+   ============================================================
+   Three-part wordmark: [>] [MAJOR] [ops]
+   The > prompt is IBM Plex Mono at ~55% of the wordmark size,
+   optically 2px below baseline, 4px margin-right.
+   Peace Time: > dim green static | MAJOR smoke | ops green
+   War Time:   > red blinking     | MAJOR red heavy | ops white
+   ============================================================ */
+
+.logo {
+  display: inline-flex;
+  align-items: baseline;
+  line-height: 1;
+  text-decoration: none;
+}
+
+/* --- Prompt character --- */
+.logo .prompt {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  position: relative;
+  top: 2px;
+  margin-right: 4px;
+}
+
+/* --- MAJOR --- */
+.logo .major {
+  font-family: var(--font-display);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* --- ops --- */
+.logo .ops {
+  font-family: var(--font-mono);
+  letter-spacing: -1px;
+  text-transform: lowercase;
+}
+
+/* --- Size variants (prompt scales at ~55% of wordmark) --- */
+.logo.lg .prompt { font-size: 30px; }
+.logo.lg .major  { font-size: 56px; font-weight: 700; }
+.logo.lg .ops    { font-size: 56px; font-weight: 400; }
+
+.logo.md .prompt { font-size: 18px; }
+.logo.md .major  { font-size: 32px; font-weight: 700; }
+.logo.md .ops    { font-size: 32px; font-weight: 400; }
+
+.logo.sm .prompt { font-size: 11px; }
+.logo.sm .major  { font-size: 20px; font-weight: 700; }
+.logo.sm .ops    { font-size: 20px; font-weight: 400; }
+
+.logo.xs .prompt { font-size: 8px; }
+.logo.xs .major  { font-size: 14px; font-weight: 700; }
+.logo.xs .ops    { font-size: 14px; font-weight: 400; }
+
+/* --- Peace Time (default) --- */
+.logo.peacetime .prompt { color: var(--color-green-dim); }
+.logo.peacetime .major  { color: var(--color-smoke); letter-spacing: 3px; }
+.logo.peacetime .ops    { color: var(--color-green); }
+
+/* --- War Time --- */
+.logo.wartime .prompt {
+  color: var(--color-fire-red);
+  font-weight: 700;
+  animation: blink var(--duration-blink) infinite;
+}
+.logo.wartime .major  {
+  color: var(--color-fire-red);
+  font-weight: 900;
+  letter-spacing: 4px;
+}
+.logo.wartime .ops    { color: var(--color-white); font-weight: 700; }
+
+/* --- Severity overrides for wartime prompt color --- */
+.logo.severity-high .prompt   { color: var(--color-status-high); }
+.logo.severity-high .major    { color: var(--color-status-high); }
+.logo.severity-medium .prompt { color: var(--color-status-medium); animation: none; }
+.logo.severity-medium .major  { color: var(--color-status-medium); }

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generic Run Card — HR Systems | MajorOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700;800;900&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red:        #CC0000;
+      --red-dark:   #990000;
+      --green:      #00CC00;
+      --green-dim:  #008800;
+      --amber:      #CC8800;
+      --black:      #0A0A0A;
+      --charcoal:   #1A1A1A;
+      --slate:      #2A2A2A;
+      --storm:      #404040;
+      --fog:        #808080;
+      --smoke:      #CCCCCC;
+      --white:      #FFFFFF;
+      --orange:     #FF6600;
+      --font-d: 'Orbitron', sans-serif;
+      --font-h: 'Saira Condensed', sans-serif;
+      --font-b: 'IBM Plex Sans', sans-serif;
+      --font-m: 'IBM Plex Mono', monospace;
+    }
+    @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0; }
+    body { background: var(--black); color: var(--white); font-family: var(--font-b); font-size: 14px; line-height: 1.6; }
+    .page { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+    .top-bar { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:2px solid var(--red); margin-bottom:28px; }
+    .logo { display:inline-flex; align-items:baseline; text-decoration:none; }
+    .logo .prompt { font-family:var(--font-m); font-size:11px; font-weight:700; color:var(--red); animation:blink 1.5s infinite; margin-right:4px; }
+    .logo .major  { font-family:var(--font-d); font-size:20px; font-weight:900; color:var(--red); letter-spacing:4px; text-transform:uppercase; }
+    .logo .ops    { font-family:var(--font-m); font-size:20px; font-weight:700; color:var(--white); letter-spacing:-1px; text-transform:lowercase; }
+    .top-right { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .badge { display:inline-flex; align-items:center; padding:3px 10px; font-family:var(--font-b); font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; border:1px solid; }
+    .b-tier2  { color:var(--amber); border-color:var(--amber); }
+    .b-box2   { color:var(--amber); border-color:var(--amber); background:rgba(204,136,0,0.1); }
+    .b-ver    { color:var(--fog); border-color:var(--storm); font-family:var(--font-m); }
+    .b-mim    { color:var(--red); border-color:var(--red-dark); background:rgba(204,0,0,0.1); }
+
+    .breadcrumb { font-family:var(--font-m); font-size:10px; color:var(--fog); letter-spacing:0.05em; margin-bottom:8px; }
+    .breadcrumb a { color:var(--fog); text-decoration:none; }
+    .breadcrumb a:hover { color:var(--smoke); }
+
+    .header { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:12px; }
+    .type-label { font-family:var(--font-m); font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--fog); margin-bottom:6px; }
+    .title { font-family:var(--font-h); font-size:36px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--white); line-height:1.1; }
+    .header-right { flex-shrink:0; text-align:right; }
+    .alarm-big { font-family:var(--font-d); font-size:48px; font-weight:900; color:var(--amber); letter-spacing:2px; line-height:1; }
+    .alarm-sub { font-family:var(--font-m); font-size:10px; color:var(--amber); letter-spacing:2px; margin-top:4px; }
+
+    .impact-bar { background:var(--charcoal); border:1px solid var(--slate); border-left:4px solid var(--amber); padding:12px 20px; margin-bottom:24px; }
+    .impact-label { font-family:var(--font-m); font-size:10px; font-weight:700; letter-spacing:3px; color:var(--fog); margin-bottom:6px; }
+    .impact-text  { font-size:13px; color:var(--smoke); line-height:1.6; }
+
+    .exposure-block { background:var(--black); border:1px solid var(--slate); border-left:4px solid var(--red); padding:14px 20px; margin-bottom:24px; display:flex; align-items:center; gap:32px; }
+    .exp-label { font-family:var(--font-m); font-size:10px; font-weight:700; letter-spacing:3px; color:var(--fog); white-space:nowrap; }
+    .exp-code  { font-family:var(--font-m); font-size:22px; font-weight:700; color:var(--red); letter-spacing:2px; }
+    .exp-note  { font-size:12px; color:var(--fog); }
+
+    .card { background:var(--charcoal); border:1px solid var(--slate); padding:20px; margin-bottom:16px; }
+    .card-green  { border-left:4px solid var(--green); }
+    .card-orange { border-left:4px solid var(--orange); }
+    .card-amber  { border-left:4px solid var(--amber); }
+    .card-red    { border-left:4px solid var(--red); }
+
+    .card-head { display:flex; align-items:center; gap:8px; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--slate); }
+    .card-title { font-family:var(--font-h); font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--white); }
+
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    @media(max-width:700px){ .grid-3,.grid-2{ grid-template-columns:1fr; } .header{ flex-direction:column; } }
+
+    .checklist { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .checklist li { display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--smoke); }
+    .check-box { flex-shrink:0; width:16px; height:16px; border:1px solid var(--storm); background:var(--black); margin-top:1px; }
+    .checklist li strong { color:var(--white); }
+    .checklist li .note { display:block; font-family:var(--font-m); font-size:11px; color:var(--fog); margin-top:2px; }
+
+    .alarm-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+    .alarm-table th { font-family:var(--font-b); font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--fog); padding:6px 10px; text-align:left; border-bottom:1px solid var(--slate); }
+    .alarm-table td { padding:10px; font-size:13px; color:var(--smoke); border-bottom:1px solid rgba(42,42,42,0.5); vertical-align:top; }
+    .alarm-table td:first-child { font-family:var(--font-m); font-size:12px; font-weight:700; white-space:nowrap; }
+    .box3c { color:var(--red); } .box2c { color:var(--amber); } .box1c { color:#2266CC; }
+
+    .esc-path { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .esc-node { font-family:var(--font-h); font-size:13px; font-weight:700; text-transform:uppercase; color:var(--white); background:var(--slate); padding:3px 10px; border:1px solid var(--storm); }
+    .esc-arrow { font-family:var(--font-m); color:var(--red); font-size:16px; }
+
+    .timebox-row { display:flex; align-items:center; gap:14px; padding:10px 0; border-bottom:1px solid var(--slate); }
+    .timebox-row:last-child { border-bottom:none; }
+    .timebox-t { font-family:var(--font-m); font-size:20px; font-weight:700; color:var(--red); min-width:55px; }
+    .timebox-l { font-family:var(--font-h); font-size:14px; font-weight:700; text-transform:uppercase; color:var(--white); }
+    .timebox-d { font-size:12px; color:var(--fog); }
+
+    .t3-banner { background:rgba(204,136,0,0.07); border:1px solid rgba(204,136,0,0.2); padding:12px 16px; margin-bottom:16px; font-size:12px; color:var(--amber); }
+    .t3-banner strong { color:var(--white); }
+
+    .release-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+    .release-list li { display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--smoke); }
+    .check-ok { flex-shrink:0; font-family:var(--font-m); font-size:14px; color:var(--green); margin-top:1px; }
+
+    .footer { margin-top:40px; padding-top:14px; border-top:1px solid var(--slate); display:flex; align-items:center; justify-content:space-between; }
+    .footer-text { font-family:var(--font-m); font-size:11px; color:var(--fog); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top-bar">
+    <a class="logo" href="runcard-browser.html">
+      <span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span>
+    </a>
+    <div class="top-right">
+      <span class="badge b-ver">RC-GEN-HR-001</span>
+      <span class="badge b-ver">v1.0</span>
+      <span class="badge b-tier2">TIER 2 &nbsp;·&nbsp; GENERIC APP</span>
+      <span class="badge b-mim">MIM OWNED</span>
+    </div>
+  </div>
+
+  <div class="breadcrumb">
+    <a href="runcard-browser.html">Run Card Browser</a> &rsaquo; Accounting &amp; Finance &rsaquo; Tier 2 &rsaquo; HR Systems
+  </div>
+
+  <div class="header">
+    <div>
+      <div class="type-label">Generic App Run Card &nbsp;·&nbsp; Accounting &amp; Finance</div>
+      <div class="title">HR Systems</div>
+    </div>
+    <div class="header-right">
+      <div class="alarm-big">BOX 2</div>
+      <div class="alarm-sub">DEFAULT RESPONSE</div>
+    </div>
+  </div>
+
+  <div class="impact-bar">
+    <div class="impact-label">Business Impact Statement</div>
+    <div class="impact-text">
+      HR Systems encompass payroll processing, employee benefits, time tracking, and workforce data. A full outage prevents payroll runs, blocks employee self-service, and may delay compliance reporting. Impact escalates significantly if the incident coincides with a Thursday payroll window.
+      This card applies to any HR platform — Workday, ADP, UKG, or custom. For platform-specific response, check for a Tier 3 card in the Run Card Browser.
+    </div>
+  </div>
+
+  <!-- EXPOSURE NOTATION -->
+  <div class="exposure-block">
+    <div class="exp-label">Typical Initial Exposure</div>
+    <div class="exp-code">E1T2V2C(~)R(~)</div>
+    <div class="exp-note">
+      1 team exposed &nbsp;·&nbsp; 2 teams engaged &nbsp;·&nbsp; limited external visibility &nbsp;·&nbsp; confidence and recovery unknown at open.<br>
+      Update every 15 minutes. Escalate exposure if payroll run is active or V field rises.
+    </div>
+  </div>
+
+  <!-- ALARM LEVEL GUIDE -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-head">
+      <div class="card-title">Alarm Level Guide</div>
+    </div>
+    <table class="alarm-table">
+      <thead>
+        <tr><th>Alarm</th><th>Trigger Condition</th><th>MIM Action</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="box3c">BOX 3 · P1</span></td>
+          <td>Full outage during Thursday payroll run, or data integrity concern affecting employee compensation</td>
+          <td>Immediate BOX 3 declaration. Notify Finance Director and VP Finance.</td>
+        </tr>
+        <tr>
+          <td><span class="box2c">BOX 2 · P2</span></td>
+          <td>Full outage outside payroll window, or degraded performance affecting >50% of users</td>
+          <td>Default response. Contact Finance Technology Manager. Pull Tier 3 card if available.</td>
+        </tr>
+        <tr>
+          <td><span class="box1c">BOX 1 · P3</span></td>
+          <td>Partial degradation, single feature unavailable, or performance issues affecting minority of users</td>
+          <td>Notify Finance Technology Manager. Monitor. No bridge unless escalating.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CAN -->
+  <div class="grid-3">
+    <div class="card card-green">
+      <div class="card-head">
+        <span class="badge" style="color:var(--green);border-color:var(--green-dim);">C</span>
+        <div class="card-title">Conditions</div>
+      </div>
+      <ul class="checklist">
+        <li><div class="check-box"></div><div><strong>Which HR system(s)?</strong><span class="note">Payroll, benefits, time tracking, or all?</span></div></li>
+        <li><div class="check-box"></div><div><strong>Is payroll run active?</strong><span class="note">Thu 8–11PM = auto BOX 3</span></div></li>
+        <li><div class="check-box"></div><div><strong>How many users affected?</strong><span class="note">All employees? Specific role or region?</span></div></li>
+        <li><div class="check-box"></div><div><strong>Any recent changes?</strong><span class="note">Config updates, vendor maintenance, SSO changes?</span></div></li>
+        <li><div class="check-box"></div><div><strong>Data integrity concern?</strong><span class="note">Compensation data at risk? Compliance exposure?</span></div></li>
+        <li><div class="check-box"></div><div><strong>Vendor status page checked?</strong><span class="note">Is this a known vendor incident?</span></div></li>
+      </ul>
+    </div>
+
+    <div class="card card-orange">
+      <div class="card-head">
+        <span class="badge" style="color:var(--orange);border-color:var(--orange);">A</span>
+        <div class="card-title">Actions</div>
+      </div>
+      <ul class="checklist">
+        <li><div class="check-box"></div><div><strong>MIM opens incident</strong><span class="note">Default BOX 2. Escalate to BOX 3 if payroll active.</span></div></li>
+        <li><div class="check-box"></div><div><strong>Contact Finance Tech Manager</strong><span class="note">Page immediately. Confirm system scope.</span></div></li>
+        <li><div class="check-box"></div><div><strong>Check vendor status page</strong><span class="note">Most HR platforms publish real-time status.</span></div></li>
+        <li><div class="check-box"></div><div><strong>Check Tier 3 card</strong><span class="note">Platform-specific? Use the browser to find it.</span></div></li>
+        <li><div class="check-box"></div><div><strong>Open vendor P1 ticket</strong><span class="note">Do not wait on internal triage for SaaS HR tools.</span></div></li>
+        <li><div class="check-box"></div><div><strong>MIM posts first milestone T+15</strong><span class="note">CAN format. Note payroll status explicitly.</span></div></li>
+      </ul>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-head">
+        <span class="badge" style="color:var(--amber);border-color:var(--amber);">N</span>
+        <div class="card-title">Needs</div>
+      </div>
+      <ul class="checklist">
+        <li><div class="check-box"></div><div><strong>Vendor escalation contact</strong><span class="note">Finance Tech Manager holds vendor contacts. Or Tier 3 card.</span></div></li>
+        <li><div class="check-box"></div><div><strong>Payroll fallback plan?</strong><span class="note">Manual payroll process? Legal / HR team aware?</span></div></li>
+        <li><div class="check-box"></div><div><strong>Compliance risk confirmed?</strong><span class="note">Late payroll has legal deadlines. Involve HR &amp; Legal early.</span></div></li>
+        <li><div class="check-box"></div><div><strong>Leadership notification</strong><span class="note">Finance Director at BOX 2. VP Finance at BOX 3.</span></div></li>
+        <li><div class="check-box"></div><div><strong>ETA from vendor?</strong><span class="note">If SaaS — get on record. Escalate if no ETA in 30 min.</span></div></li>
+        <li><div class="check-box"></div><div><strong>MIM: update exposure every 15 min</strong><span class="note">Escalate V field if employees reporting via help desk.</span></div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TIER 3 PROMPT -->
+  <div class="t3-banner">
+    <strong>Is there a Tier 3 card for this system?</strong> &nbsp; This generic card covers all HR platforms. If the specific system is known (Workday, ADP, UKG, Paylocity, etc.), check the <a href="runcard-browser.html" style="color:var(--amber);">Run Card Browser</a> for a team-authored Tier 3 card. Tier 3 cards include vendor contacts, runbook links, and platform-specific diagnostics.
+  </div>
+
+  <div class="grid-2">
+    <!-- ESCALATION PATH -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Escalation Path</div></div>
+      <div class="esc-path">
+        <div class="esc-node">Finance Tech Mgr</div>
+        <div class="esc-arrow">&#8594;</div>
+        <div class="esc-node">MIM</div>
+        <div class="esc-arrow">&#8594;</div>
+        <div class="esc-node">Finance Director</div>
+        <div class="esc-arrow">&#8594;</div>
+        <div class="esc-node">VP Finance</div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;color:var(--fog);">
+        Trigger escalation when: payroll run is at risk, vendor has not responded within 30 minutes, or data integrity concern is identified.
+      </div>
+    </div>
+
+    <!-- TIMEBOXES -->
+    <div class="card">
+      <div class="card-head"><div class="card-title">Response Timeboxes</div></div>
+      <div class="timebox-row">
+        <div class="timebox-t">T+5</div>
+        <div><div class="timebox-l">Bridge Open</div><div class="timebox-d">Finance Tech Manager paged. MIM assigned.</div></div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-t">T+15</div>
+        <div><div class="timebox-l">First Milestone</div><div class="timebox-d">Scope confirmed. Vendor ticket open if SaaS.</div></div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-t">T+30</div>
+        <div><div class="timebox-l">Vendor ETA Decision</div><div class="timebox-d">If no ETA — escalate to Finance Director.</div></div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-t">T+60</div>
+        <div><div class="timebox-l">Payroll Fallback Decision</div><div class="timebox-d">If in payroll window — Finance Director + HR make call.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELEASE CRITERIA -->
+  <div class="card card-green">
+    <div class="card-head"><div class="card-title">Release Criteria</div></div>
+    <div style="font-size:12px;color:var(--fog);margin-bottom:12px;">All conditions must be met before MIM releases responders:</div>
+    <ul class="release-list">
+      <li><div class="check-ok">&#10003;</div><div>HR system confirmed accessible by Finance Technology Manager</div></li>
+      <li><div class="check-ok">&#10003;</div><div>Payroll impact assessed — run completed, deferred with plan, or manual fallback activated</div></li>
+      <li><div class="check-ok">&#10003;</div><div>No active compliance or data integrity concern outstanding</div></li>
+      <li><div class="check-ok">&#10003;</div><div>Vendor ticket status documented — resolved or tracked with ETA</div></li>
+      <li><div class="check-ok">&#10003;</div><div>Finance Director notified of resolution (if BOX 2 or higher)</div></li>
+      <li><div class="check-ok">&#10003;</div><div>After Action scheduled if BOX 2+ or payroll was affected</div></li>
+    </ul>
+  </div>
+
+  <div class="footer">
+    <div class="footer-text">RC-GEN-HR-001 &nbsp;·&nbsp; HR Systems Generic Card &nbsp;·&nbsp; v1.0</div>
+    <div class="footer-text">majorops.io &nbsp;·&nbsp; CC BY 4.0</div>
+  </div>
+
+</div>
+</body>
+</html>

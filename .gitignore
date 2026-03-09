@@ -1,0 +1,40 @@
+# ── MkDocs build output ──────────────────────────────────────────
+site/
+
+# ── Python ───────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Node ─────────────────────────────────────────────────────────
+node_modules/
+dist/
+.cache/
+
+# ── Cloudflare / Wrangler ─────────────────────────────────────────
+.dev.vars
+.wrangler/
+
+# ── Archives and large pre-migration artifacts ────────────────────
+*.zip
+tmp/
+output/
+
+# ── Superseded by MkDocs (migrated to docs/) ─────────────────────
+github-publish/
+
+# ── Raw Obsidian vaults (consolidated into docs/) ─────────────────
+older obsidian vaults to review/
+DOMAINS.md
+
+# ── macOS metadata ────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

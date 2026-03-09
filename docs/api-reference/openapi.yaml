@@ -1,0 +1,832 @@
+openapi: 3.1.0
+
+info:
+  title: MajorOps API
+  version: "0.1.0"
+  description: |
+    REST API for the MajorOps incident command platform.
+
+    **Authentication:** All endpoints require a valid Cloudflare Access JWT passed as a cookie (`CF_Authorization`) or as a Bearer token in the `Authorization` header. The identity claim used is `email`.
+
+    **ID format:** Production IDs are ULIDs (sortable, 26-character). The mock/dev environment uses numeric IDs.
+
+    **Timestamps:** All timestamps are ISO 8601 strings in the API layer. Stored as Unix ms in D1.
+
+servers:
+  - url: https://api.majorops.io/v1
+    description: Production
+  - url: http://localhost:8787/v1
+    description: Local Wrangler dev
+
+tags:
+  - name: Incidents
+    description: Core incident lifecycle — open, update, advance phase, close.
+  - name: Timeline
+    description: Chronological fireground event log for an incident.
+  - name: Updates
+    description: Published status communications (public and internal).
+  - name: Milestones
+    description: Structured stakeholder/exec comms cuts.
+  - name: Users
+    description: User identity and role management.
+
+paths:
+
+  # ─── Incidents ───────────────────────────────────────────────────────────────
+
+  /incidents:
+    get:
+      tags: [Incidents]
+      summary: List incidents
+      description: Returns all incidents visible to the authenticated user. Scoped by role — executives see a summary shape; MIMs see the full record.
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [Active, Monitoring, Resolved]
+          description: Filter by incident status.
+        - name: severity
+          in: query
+          schema:
+            type: string
+            enum: [Critical, High, Medium, Low]
+          description: Filter by severity.
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+          description: ULID cursor for keyset pagination.
+      responses:
+        "200":
+          description: List of incidents.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  incidents:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Incident"
+                  next_cursor:
+                    type: string
+                    nullable: true
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+    post:
+      tags: [Incidents]
+      summary: Open a new incident
+      description: Creates a new incident in Phase 1 (Alert). Requires `mim` or `admin` role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentCreate"
+      responses:
+        "201":
+          description: Incident created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /incidents/{id}:
+    parameters:
+      - $ref: "#/components/parameters/IncidentId"
+
+    get:
+      tags: [Incidents]
+      summary: Get incident detail
+      description: Returns the full incident record including command team, alert info, timeline, updates, and milestones.
+      responses:
+        "200":
+          description: Full incident record.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    patch:
+      tags: [Incidents]
+      summary: Update incident fields
+      description: Partial update. Accepts any subset of top-level incident fields. All changes are appended to the timeline automatically. Requires `mim` or `admin` role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IncidentUpdate"
+      responses:
+        "200":
+          description: Updated incident.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /incidents/{id}/phase:
+    parameters:
+      - $ref: "#/components/parameters/IncidentId"
+
+    post:
+      tags: [Incidents]
+      summary: Advance phase
+      description: |
+        Advances the incident to the next phase (or a specified phase). Phases only move forward — you cannot set a phase lower than the current one. A `phase` timeline event is appended automatically.
+
+        **Phase sequence:** Alert (1) → Gather (2) → Assess (3) → Initial (4) → Isolation (5) → Mitigation (6) → Validation (7) → Resolution (8)
+
+        Advancing to Phase 8 (Resolution) does **not** automatically set `status` to `Resolved` — use `PATCH /incidents/{id}` to close the incident explicitly.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phase]
+              properties:
+                phase:
+                  type: integer
+                  minimum: 1
+                  maximum: 8
+                  description: Target phase number. Must be greater than current phase.
+                note:
+                  type: string
+                  description: Optional MIM note appended to the timeline event.
+      responses:
+        "200":
+          description: Updated incident with new phase.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Incident"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /incidents/{id}/command:
+    parameters:
+      - $ref: "#/components/parameters/IncidentId"
+
+    patch:
+      tags: [Incidents]
+      summary: Update command team
+      description: Updates one or more role assignments. Any changed assignments are logged to the timeline. Requires `mim` or `admin` role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommandTeam"
+      responses:
+        "200":
+          description: Updated command team.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommandTeam"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ─── Timeline ────────────────────────────────────────────────────────────────
+
+  /incidents/{id}/timeline:
+    parameters:
+      - $ref: "#/components/parameters/IncidentId"
+
+    get:
+      tags: [Timeline]
+      summary: Get timeline events
+      description: Returns the full chronological event log for the incident. Internal events are hidden from non-MIM roles.
+      parameters:
+        - name: visibility
+          in: query
+          schema:
+            type: string
+            enum: [public, internal, all]
+            default: all
+          description: Filter by audience. Non-MIM callers are automatically limited to `public`.
+      responses:
+        "200":
+          description: List of timeline events.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TimelineEvent"
+
+    post:
+      tags: [Timeline]
+      summary: Post a timeline event
+      description: Appends a manual log entry. Most events are created automatically by incident state changes — this endpoint is for MIM notes and manual actions. Requires `mim` or `admin` role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, title, description]
+              properties:
+                type:
+                  type: string
+                  enum: [update, command, alert, action]
+                  description: Event category. `phase` events are created by the phase advance endpoint only.
+                title:
+                  type: string
+                description:
+                  type: string
+                visibility:
+                  type: string
+                  enum: [public, internal]
+                  default: internal
+      responses:
+        "201":
+          description: Created timeline event.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TimelineEvent"
+
+  # ─── Status Updates ──────────────────────────────────────────────────────────
+
+  /incidents/{id}/updates:
+    parameters:
+      - $ref: "#/components/parameters/IncidentId"
+
+    get:
+      tags: [Updates]
+      summary: List status updates
+      description: Returns published status updates. Public updates are visible to all. Internal updates require `mim` or `admin` role.
+      parameters:
+        - name: visibility
+          in: query
+          schema:
+            type: string
+            enum: [public, internal, all]
+      responses:
+        "200":
+          description: List of status updates.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updates:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/StatusUpdate"
+
+    post:
+      tags: [Updates]
+      summary: Post a status update
+      description: Publishes a new status update. A corresponding timeline event is appended automatically. Requires `mim` or `admin` role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content, visibility]
+              properties:
+                content:
+                  type: string
+                  description: Update body text.
+                visibility:
+                  type: string
+                  enum: [public, internal]
+                next_update_eta:
+                  type: string
+                  format: date-time
+                  nullable: true
+                  description: If set, updates `incident.nextUpdateEta` and shows a cadence badge.
+      responses:
+        "201":
+          description: Created status update.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatusUpdate"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ─── Milestones ──────────────────────────────────────────────────────────────
+
+  /incidents/{id}/milestones:
+    parameters:
+      - $ref: "#/components/parameters/IncidentId"
+
+    get:
+      tags: [Milestones]
+      summary: List milestones
+      description: Returns all published milestones for the incident, ordered by sequence.
+      responses:
+        "200":
+          description: List of milestones.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  milestones:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Milestone"
+
+    post:
+      tags: [Milestones]
+      summary: Cut a milestone
+      description: |
+        Publishes a new milestone. Milestones are the unit of stakeholder and exec communication — they surface in the Stakeholder and Executive views.
+
+        Setting `is_resolution: true` marks this as the final milestone and should be paired with closing the incident via `PATCH /incidents/{id}`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, body]
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                  description: Stakeholder/exec summary. MIM-edited before publishing.
+                next_update_eta:
+                  type: string
+                  format: date-time
+                  nullable: true
+                is_resolution:
+                  type: boolean
+                  default: false
+      responses:
+        "201":
+          description: Published milestone.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Milestone"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ─── Users ───────────────────────────────────────────────────────────────────
+
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user
+      description: Returns the authenticated user's profile and role, derived from the Cloudflare Access JWT.
+      responses:
+        "200":
+          description: Current user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List users
+      description: Returns all users. Requires `admin` role.
+      responses:
+        "200":
+          description: List of users.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+# ─── Components ──────────────────────────────────────────────────────────────
+
+components:
+
+  parameters:
+    IncidentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Incident ID (ULID in production, numeric string in dev).
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid Cloudflare Access JWT.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Forbidden:
+      description: Authenticated but insufficient role.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: Incident not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    BadRequest:
+      description: Validation error.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+
+    # ── Enums / simple types ──────────────────────────────────────────────────
+
+    Severity:
+      type: string
+      enum: [Critical, High, Medium, Low]
+      description: Incident severity band. Maps to alarm levels — Critical=Box 3, High=Box 2, Medium=Box 1, Low=Box 0.
+
+    IncidentStatus:
+      type: string
+      enum: [Active, Monitoring, Resolved]
+      description: |
+        Overall incident lifecycle state.
+        - `Active` — ongoing, responders working.
+        - `Monitoring` — mitigation applied, in observation period.
+        - `Resolved` — incident closed, After Action (Learning Review) to follow.
+
+    ExternalImpact:
+      type: string
+      enum: [Yes, No, Unknown, Likely]
+      description: Whether the incident has confirmed or suspected external customer impact.
+
+    RiskLevel:
+      type: string
+      enum: [Low, Medium, High]
+      description: Exec-facing risk flag. Reflects current uncertainty and blast radius.
+
+    UpdateVisibility:
+      type: string
+      enum: [public, internal]
+      description: Audience scope for updates and timeline events.
+
+    # ── Core objects ─────────────────────────────────────────────────────────
+
+    CommandTeam:
+      type: object
+      properties:
+        sre:
+          type: string
+          description: SRE lead — owns technical recovery track.
+        mim:
+          type: string
+          description: Major Incident Manager — owns command and comms.
+        leader:
+          type: string
+          description: Incident leader / Incident Commander — escalation authority.
+        serviceManager:
+          type: string
+          description: Service owner liaison.
+        customerOps:
+          type: string
+          description: Customer communications lead.
+
+    AlertInfo:
+      type: object
+      properties:
+        alertId:
+          type: string
+          description: Source alert identifier (PagerDuty, OpsGenie, etc.).
+        customerCount:
+          type: integer
+          description: Confirmed impacted customers at detection.
+        issueTime:
+          type: string
+          format: date-time
+          description: When the alert fired. Start of elapsed-time calculations.
+        resolveTime:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the alert cleared. Null while still firing.
+        externalImpact:
+          $ref: "#/components/schemas/ExternalImpact"
+
+    TimelineEvent:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Event identifier (ULID).
+        type:
+          type: string
+          enum: [phase, update, command, alert, action]
+          description: Event category. Determines icon and color in the timeline feed.
+        title:
+          type: string
+          description: Event headline.
+        description:
+          type: string
+          description: Detail shown in the timeline feed.
+        actor:
+          type: string
+          description: Display name of who performed the action.
+        timestamp:
+          type: string
+          format: date-time
+        visibility:
+          $ref: "#/components/schemas/UpdateVisibility"
+        phaseNumber:
+          type: integer
+          minimum: 1
+          maximum: 8
+          nullable: true
+          description: Set for `phase` type events to reference the phase transition.
+
+    StatusUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Update identifier (ULID).
+        content:
+          type: string
+          description: Update body text.
+        visibility:
+          $ref: "#/components/schemas/UpdateVisibility"
+        author:
+          type: string
+          description: Display name of author.
+        timestamp:
+          type: string
+          format: date-time
+
+    Milestone:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Milestone identifier (ULID).
+        title:
+          type: string
+          description: Short milestone headline.
+        body:
+          type: string
+          description: Published stakeholder/exec summary.
+        statusAtCut:
+          $ref: "#/components/schemas/IncidentStatus"
+        nextUpdateEta:
+          type: string
+          format: date-time
+          nullable: true
+          description: The next committed update time promised in this milestone.
+        cutBy:
+          type: string
+          description: Display name of who published the milestone.
+        cutAt:
+          type: string
+          format: date-time
+          description: When the milestone was published. Immutable.
+        isResolution:
+          type: boolean
+          default: false
+          description: Marks the final resolution milestone.
+
+    Incident:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Incident identifier (ULID in production).
+        title:
+          type: string
+          description: Short human-readable label.
+        description:
+          type: string
+          description: Current problem description.
+        severity:
+          $ref: "#/components/schemas/Severity"
+        status:
+          $ref: "#/components/schemas/IncidentStatus"
+        phase:
+          type: integer
+          minimum: 1
+          maximum: 8
+          description: Current phase (1–8).
+        phaseEnteredAt:
+          type: string
+          format: date-time
+          description: When the incident entered the current phase.
+        detectedAt:
+          type: string
+          format: date-time
+          description: Detection / open timestamp.
+        resolvedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Set on close. Null while active.
+        affectedSystems:
+          type: array
+          items:
+            type: string
+          description: Systems or services impacted.
+        bridgeUrl:
+          type: string
+          nullable: true
+          description: Conferencing link. Shown in public and MIM views.
+        command:
+          $ref: "#/components/schemas/CommandTeam"
+        alert:
+          $ref: "#/components/schemas/AlertInfo"
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/TimelineEvent"
+        updates:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusUpdate"
+        updatesPosted:
+          type: integer
+          description: Denormalized count of published updates.
+        milestones:
+          type: array
+          items:
+            $ref: "#/components/schemas/Milestone"
+        nextUpdateEta:
+          type: string
+          format: date-time
+          nullable: true
+          description: Next committed update ETA. Drives cadence badges in the Stakeholder and Exec views.
+        lastCommunicatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp of last outbound communication.
+        businessImpact:
+          type: string
+          description: Brief statement of business risk. Surfaces in the Executive view.
+        customerImpactSummary:
+          type: string
+          description: Customer-facing impact summary.
+        riskLevel:
+          $ref: "#/components/schemas/RiskLevel"
+        execSummary:
+          type: string
+          description: One-paragraph exec brief. AI-assisted, MIM-editable.
+        audienceNotes:
+          type: string
+          description: Optional per-incident guidance for stakeholders/execs.
+
+    IncidentCreate:
+      type: object
+      required: [title, severity]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        affectedSystems:
+          type: array
+          items:
+            type: string
+        bridgeUrl:
+          type: string
+          nullable: true
+        alertId:
+          type: string
+          description: Source alert ID from the monitoring system.
+        customerCount:
+          type: integer
+          default: 0
+        externalImpact:
+          $ref: "#/components/schemas/ExternalImpact"
+
+    IncidentUpdate:
+      type: object
+      description: Partial update — include only the fields you want to change.
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        status:
+          $ref: "#/components/schemas/IncidentStatus"
+        affectedSystems:
+          type: array
+          items:
+            type: string
+        bridgeUrl:
+          type: string
+          nullable: true
+        businessImpact:
+          type: string
+        customerImpactSummary:
+          type: string
+        riskLevel:
+          $ref: "#/components/schemas/RiskLevel"
+        execSummary:
+          type: string
+        audienceNotes:
+          type: string
+        nextUpdateEta:
+          type: string
+          format: date-time
+          nullable: true
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User identifier. Matches the email claim from the Cloudflare Access JWT.
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+          nullable: true
+        role:
+          type: string
+          enum: [mim, stakeholder, executive, admin]
+          description: |
+            Role determines view routing and permissions.
+            - `mim` — Full fireground access. Can create incidents, advance phases, post updates.
+            - `stakeholder` — Read access to stakeholder view. Cannot post.
+            - `executive` — Read access to exec brief view. Cannot post.
+            - `admin` — Full access including user management.
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Machine-readable error code.
+        message:
+          type: string
+          description: Human-readable description.
+        status:
+          type: integer
+          description: HTTP status code.

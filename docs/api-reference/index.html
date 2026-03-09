@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MajorOps API Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Orbitron:wght@700;900&family=Saira+Condensed:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #141414;
+      --surface:   #1c1c1c;
+      --surface2:  #222222;
+      --border:    #2e2e2e;
+      --text:      rgba(242,242,242,0.87);
+      --dim:       rgba(180,180,180,0.5);
+      --red:       #cc0000;
+      --red-hi:    #ff3333;
+      --green:     #22c55e;
+      --amber:     #f59e0b;
+      --blue:      #3b82f6;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ── */
+    .ops-topbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 48px;
+      background: #0a0a0a;
+      border-bottom: 2px solid var(--red);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      z-index: 1000;
+    }
+
+    .ops-wordmark {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+    .ops-wordmark .chevron { color: var(--red); }
+    .ops-wordmark .major   { color: var(--red); }
+    .ops-wordmark .ops     { color: rgba(242,242,242,0.55); }
+
+    .ops-topbar-sep { color: var(--border); font-size: 18px; }
+
+    .ops-topbar-title {
+      font-family: 'Saira Condensed', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--dim);
+    }
+
+    .ops-topbar-badge {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      padding: 2px 8px;
+    }
+
+    /* ── Layout ── */
+    .ops-layout {
+      display: flex;
+      min-height: 100vh;
+      padding-top: 48px;
+    }
+
+    .ops-sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 48px;
+      height: calc(100vh - 48px);
+      overflow-y: auto;
+      background: #111;
+      border-right: 1px solid var(--border);
+      padding: 16px 0;
+    }
+
+    .ops-sidebar::-webkit-scrollbar { width: 4px; }
+    .ops-sidebar::-webkit-scrollbar-track { background: transparent; }
+    .ops-sidebar::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .sidebar-group-label {
+      font-family: 'Saira Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--dim);
+      padding: 12px 16px 4px;
+    }
+
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      font-size: 13px;
+      color: var(--dim);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-link:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .sidebar-link.active { color: var(--text); border-left-color: var(--red); background: rgba(204,0,0,0.08); }
+
+    .method-dot {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 5px;
+      flex-shrink: 0;
+    }
+    .method-get    { background: rgba(59,130,246,0.15); color: #60a5fa; }
+    .method-post   { background: rgba(34,197,94,0.12); color: #4ade80; }
+    .method-patch  { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .method-delete { background: rgba(204,0,0,0.12); color: #f87171; }
+
+    /* ── Main content ── */
+    .ops-main {
+      flex: 1;
+      min-width: 0;
+      padding: 0;
+    }
+
+    /* ── Swagger UI overrides ── */
+    #swagger-ui {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 32px 64px;
+    }
+
+    .swagger-ui { color: var(--text); font-family: var(--sans); }
+
+    /* hide default topbar */
+    .swagger-ui .topbar { display: none !important; }
+
+    /* info block */
+    .swagger-ui .info { margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
+    .swagger-ui .info hgroup.main { display: flex; align-items: baseline; gap: 12px; }
+    .swagger-ui .info .title {
+      font-family: 'Saira Condensed', sans-serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+    .swagger-ui .info .title small { display: none; }
+    .swagger-ui .info .version {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      padding: 2px 7px;
+    }
+    .swagger-ui .info p, .swagger-ui .info li { color: var(--dim); font-size: 13px; }
+    .swagger-ui .info a { color: var(--red-hi); }
+
+    /* server selector */
+    .swagger-ui .scheme-container {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 12px 16px;
+      margin-bottom: 24px;
+    }
+    .swagger-ui .schemes > label { color: var(--dim); font-size: 11px; font-family: 'Saira Condensed', sans-serif; letter-spacing: 0.1em; text-transform: uppercase; }
+    .swagger-ui .servers > label { color: var(--dim); font-size: 11px; text-transform: uppercase; }
+    .swagger-ui select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 4px 8px;
+    }
+
+    /* operation tag groups */
+    .swagger-ui .opblock-tag {
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 0;
+    }
+    .swagger-ui .opblock-tag a.nostyle, .swagger-ui .opblock-tag { color: var(--text); font-family: 'Saira Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 0.03em; }
+    .swagger-ui .opblock-tag small { color: var(--dim); font-family: var(--sans); font-size: 12px; font-weight: 400; }
+    .swagger-ui .opblock-tag:hover { background: rgba(255,255,255,0.02); }
+
+    /* operation blocks */
+    .swagger-ui .opblock {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0 !important;
+      margin-bottom: 6px;
+      box-shadow: none;
+    }
+    .swagger-ui .opblock.is-open { border-color: rgba(204,0,0,0.4); }
+
+    .swagger-ui .opblock .opblock-summary { border-bottom: 1px solid var(--border); padding: 8px 16px; }
+    .swagger-ui .opblock .opblock-summary-method {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 0 !important;
+      min-width: 56px;
+      text-align: center;
+    }
+    .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: rgba(59,130,246,0.2); color: #60a5fa; }
+    .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: rgba(34,197,94,0.15); color: #4ade80; }
+    .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: rgba(245,158,11,0.15); color: #fbbf24; }
+    .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: rgba(204,0,0,0.15); color: #f87171; }
+
+    .swagger-ui .opblock .opblock-summary-path { font-family: var(--mono); font-size: 13px; color: var(--text); }
+    .swagger-ui .opblock .opblock-summary-description { font-size: 12px; color: var(--dim); }
+    .swagger-ui .opblock .opblock-summary:hover { background: rgba(255,255,255,0.025); }
+
+    .swagger-ui .opblock-body { background: var(--surface2); }
+    .swagger-ui .opblock-description-wrapper p,
+    .swagger-ui .opblock-external-docs-wrapper p { color: var(--dim); font-size: 13px; }
+
+    /* params, responses tables */
+    .swagger-ui table { background: transparent; }
+    .swagger-ui table thead tr th { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border); background: transparent; }
+    .swagger-ui table tbody tr td { border-bottom: 1px solid var(--border); color: var(--text); }
+    .swagger-ui .parameters-col_name { font-family: var(--mono); font-size: 13px; }
+    .swagger-ui .parameter__name { color: var(--text); font-family: var(--mono); font-size: 12px; }
+    .swagger-ui .parameter__in  { color: var(--amber); font-size: 10px; font-family: var(--mono); }
+    .swagger-ui .parameter__type { color: var(--blue); font-size: 11px; font-family: var(--mono); }
+    .swagger-ui .prop-type { color: var(--blue); font-family: var(--mono); font-size: 11px; }
+    .swagger-ui .prop-format { color: var(--dim); font-size: 10px; font-family: var(--mono); }
+
+    /* response codes */
+    .swagger-ui .responses-inner { background: var(--surface2); }
+    .swagger-ui .response-col_status { font-family: var(--mono); font-size: 13px; }
+    .swagger-ui .response-col_description { color: var(--dim); font-size: 12px; }
+
+    /* code / schema blocks */
+    .swagger-ui .highlight-code, .swagger-ui pre.microlight {
+      background: #0a0a0a !important;
+      border: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 12px;
+      border-radius: 0 !important;
+    }
+    .swagger-ui .model-box { background: var(--surface); border: 1px solid var(--border); border-radius: 0 !important; }
+    .swagger-ui .model { color: var(--text); font-family: var(--mono); font-size: 12px; }
+    .swagger-ui .model-title { color: var(--text); font-family: 'Saira Condensed', sans-serif; font-size: 15px; font-weight: 700; }
+    .swagger-ui section.models { border: 1px solid var(--border); background: var(--surface); }
+    .swagger-ui section.models .model-container { background: var(--surface2); border-bottom: 1px solid var(--border); }
+
+    /* buttons */
+    .swagger-ui .btn {
+      border-radius: 0 !important;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .swagger-ui .btn.execute {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+    }
+    .swagger-ui .btn.execute:hover { background: var(--red-hi); border-color: var(--red-hi); }
+    .swagger-ui .btn.btn-clear { border-color: var(--border); color: var(--dim); }
+    .swagger-ui .btn.authorize { border-color: var(--green); color: var(--green); }
+    .swagger-ui .btn.authorize svg { fill: var(--green); }
+
+    /* inputs */
+    .swagger-ui input, .swagger-ui textarea {
+      background: var(--surface) !important;
+      border: 1px solid var(--border) !important;
+      color: var(--text) !important;
+      border-radius: 0 !important;
+      font-family: var(--mono);
+      font-size: 12px;
+    }
+    .swagger-ui input:focus, .swagger-ui textarea:focus {
+      border-color: var(--red) !important;
+      outline: none;
+    }
+
+    /* modal */
+    .swagger-ui .dialog-ux .modal-ux {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0 !important;
+      color: var(--text);
+    }
+    .swagger-ui .dialog-ux .modal-ux-header { border-bottom: 1px solid var(--border); }
+    .swagger-ui .dialog-ux .modal-ux-header h3 { font-family: 'Saira Condensed', sans-serif; color: var(--text); }
+
+    /* enum badges */
+    .swagger-ui .enum-values { display: flex; flex-wrap: wrap; gap: 4px; }
+    .swagger-ui .enum-values span {
+      font-family: var(--mono);
+      font-size: 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      color: var(--dim);
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .ops-sidebar { display: none; }
+      #swagger-ui { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top bar -->
+  <header class="ops-topbar">
+    <div class="ops-wordmark">
+      <span class="chevron">›</span><span class="major">MAJOR</span><span class="ops">ops</span>
+    </div>
+    <span class="ops-topbar-sep">|</span>
+    <span class="ops-topbar-title">API Reference</span>
+    <span class="ops-topbar-badge">v0.1 · mock data</span>
+  </header>
+
+  <div class="ops-layout">
+
+    <!-- Sidebar nav -->
+    <nav class="ops-sidebar" id="ops-sidebar">
+      <div class="sidebar-group-label">Incidents</div>
+      <a class="sidebar-link" onclick="scrollTo('incidents-get')"><span class="method-dot method-get">GET</span> List incidents</a>
+      <a class="sidebar-link" onclick="scrollTo('incidents-post')"><span class="method-dot method-post">POST</span> Open incident</a>
+      <a class="sidebar-link" onclick="scrollTo('incidents-id-get')"><span class="method-dot method-get">GET</span> Get incident</a>
+      <a class="sidebar-link" onclick="scrollTo('incidents-id-patch')"><span class="method-dot method-patch">PATCH</span> Update incident</a>
+      <a class="sidebar-link" onclick="scrollTo('incidents-phase')"><span class="method-dot method-post">POST</span> Advance phase</a>
+      <a class="sidebar-link" onclick="scrollTo('incidents-command')"><span class="method-dot method-patch">PATCH</span> Command team</a>
+
+      <div class="sidebar-group-label">Timeline</div>
+      <a class="sidebar-link" onclick="scrollTo('timeline-get')"><span class="method-dot method-get">GET</span> Get timeline</a>
+      <a class="sidebar-link" onclick="scrollTo('timeline-post')"><span class="method-dot method-post">POST</span> Post event</a>
+
+      <div class="sidebar-group-label">Updates</div>
+      <a class="sidebar-link" onclick="scrollTo('updates-get')"><span class="method-dot method-get">GET</span> List updates</a>
+      <a class="sidebar-link" onclick="scrollTo('updates-post')"><span class="method-dot method-post">POST</span> Post update</a>
+
+      <div class="sidebar-group-label">Milestones</div>
+      <a class="sidebar-link" onclick="scrollTo('milestones-get')"><span class="method-dot method-get">GET</span> List milestones</a>
+      <a class="sidebar-link" onclick="scrollTo('milestones-post')"><span class="method-dot method-post">POST</span> Cut milestone</a>
+
+      <div class="sidebar-group-label">Users</div>
+      <a class="sidebar-link" onclick="scrollTo('users-me')"><span class="method-dot method-get">GET</span> Current user</a>
+      <a class="sidebar-link" onclick="scrollTo('users-list')"><span class="method-dot method-get">GET</span> List users</a>
+
+      <div class="sidebar-group-label">Schemas</div>
+      <a class="sidebar-link" onclick="scrollToSchemas()">All schemas</a>
+    </nav>
+
+    <!-- Swagger UI -->
+    <main class="ops-main">
+      <div id="swagger-ui"></div>
+    </main>
+
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-standalone-preset.min.js"></script>
+  <script>
+    // Resolve openapi.yaml relative to this page
+    const specUrl = new URL('openapi.yaml', window.location.href).href
+
+    SwaggerUIBundle({
+      url: specUrl,
+      dom_id: '#swagger-ui',
+      presets: [
+        SwaggerUIBundle.presets.apis,
+        SwaggerUIStandalonePreset
+      ],
+      layout: 'StandaloneLayout',
+      deepLinking: true,
+      defaultModelsExpandDepth: 1,
+      defaultModelExpandDepth: 2,
+      displayRequestDuration: true,
+      tryItOutEnabled: false,   // flip to true when API is live
+      filter: true,
+      persistAuthorization: true,
+      syntaxHighlight: {
+        activate: true,
+        theme: 'monokai'
+      }
+    })
+
+    function scrollTo(id) {
+      // Swagger UI generates IDs like operations-Incidents-get_incidents
+      // We use a simple text search as fallback
+      const el = document.getElementById('operations-' + id) ||
+                 document.querySelector('[id*="' + id + '"]')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+
+    function scrollToSchemas() {
+      const el = document.querySelector('.models')
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  </script>
+</body>
+</html>
