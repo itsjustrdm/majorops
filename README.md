@@ -33,7 +33,7 @@ One data source. Multiple lenses. Zero duplication of effort.
 
 - **Tiered Awareness** — Not everyone needs the same information. MajorOps delivers the right fidelity to the right audience automatically.
 - **8-Phase Incident Model** — Alert → Gather → Assess → Initial → Isolation → Mitigation → Validation → Resolution. Every incident moves through a structured lifecycle.
-- **The MIM is the Dispatcher** — Think retro switchboard: routes signals, sets cadence, keeps span-of-control. MajorOps is built around that role.
+- **The MIM is the 911 Dispatcher, Not the Paramedic** — Routes signals, sets cadence, keeps span-of-control. MajorOps is built around that role.
 - **Call for Service** — Any team, any system can open a MajorOps incident with a minimum viable set of fields.
 - **Full Transparency** — All viewers are internal. No data is hidden. Everyone sees what they need to coordinate effectively.
 

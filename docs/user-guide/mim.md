@@ -1,6 +1,6 @@
 # MIM Operator Guide
 
-> The MIM is the switchboard operator for the incident: routes signals, sets cadence, and clears noise so specialists can fix fast.
+> The MIM is the 911 dispatcher, not the paramedic: routes signals, sets cadence, and clears noise so specialists can fix fast.
 
 ---
 

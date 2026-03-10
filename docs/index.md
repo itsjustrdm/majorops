@@ -54,11 +54,11 @@ MajorOps takes these foundations and extends them for a specific context: the **
 
 ---
 
-## The MIM Is the Switchboard Operator (No Capes)
+## The MIM Is the 911 Dispatcher, Not the Paramedic
 
 The MIM does not fix the database or write the rollback script. They route signals, set cadence, and clear noise so the people who do fix the problem can move fast with clarity and the right resources. That is the entire job.
 
-A fire IC does not carry a hose. A 911 dispatcher does not ride in the ambulance. The structure that enables the responder is as important as the responder. MajorOps is that structure.
+The dispatcher does not ride in the ambulance. The fire IC does not carry a hose. The structure that enables the responder is as important as the responder. MajorOps is that structure.
 
 ---
 
@@ -83,7 +83,7 @@ A fire IC does not carry a hose. A 911 dispatcher does not ride in the ambulance
 ## Core Principles
 
 1. **Structure enables speed.** Improvisation at scale produces chaos. Defined roles, defined communication, defined escalation — these are what let skilled people work fast.
-2. **The MIM is the signal router.** Like a retro switchboard op: orchestrates people, cadence, and context so technical leads can fix without noise.
+2. **The MIM is the signal router.** Like a 911 dispatcher: orchestrates people, cadence, and context so technical leads can fix without noise.
 3. **Borrow from the best.** Fire service, aviation, emergency medicine, and 911 dispatch have solved these problems under higher stakes. Use what they built.
 4. **Transparency is default.** Stakeholders should never have to ask for status. The structure makes status visible.
 5. **Every incident improves the next.** Post-incident review is not a blame exercise. It is the mechanism through which the organization gets better.

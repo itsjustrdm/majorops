@@ -100,9 +100,9 @@ We take from medicine: **structured handover**, **standardized severity assessme
 
 ---
 
-## The MIM Is the Switchboard Operator (No Capes)
+## The MIM Is the 911 Dispatcher, Not the Paramedic
 
-The Major Incident Manager is the switchboard operator: routes signals, sets tempo, and keeps span-of-control so specialists can work without noise. Their job is tempo, clarity, and command — not hands-on technical recovery.
+The Major Incident Manager is the 911 dispatcher: routes signals, sets tempo, and keeps span-of-control so specialists can work without noise. Their job is tempo, clarity, and command — not hands-on technical recovery.
 
 This distinction matters because the failure mode in most incidents is a technically excellent engineer trying to do two things at once: own the call *and* fix the issue. They usually fail at both.
 
