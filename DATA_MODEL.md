@@ -15,6 +15,10 @@
 | `CommandTeam` | D1 + UI | The five assigned roles for an active incident. |
 | `AlertInfo` | D1 + UI | Intake metadata: source alert ID, customer count, external impact flag. |
 | `User` | D1 | A person with access to MajorOps. Role determines view routing and permissions. |
+| `Agency` | D1 + `.md` | Tier 1 run card entity. D1 holds structured metadata; card content lives in a versioned `.md` file in the repo. |
+| `RunCard` | D1 | Tier 2 (generic app) and Tier 3 (specific app) run card records. Self-service for Tier 3; MIM-authored for Tier 2. |
+| `RunCardVersion` | D1 | Immutable snapshot of a run card at each save. Feeds the CSI loop and IRS score. |
+| `IncidentRunCard` | D1 | Junction — which run cards were opened during a specific incident. |
 | `KpiDefinition` | D1 + UI | Authoritative KPI metadata (slug, formula, targets, visibility). Feeds all scorecards. |
 | `KpiObservation` | D1 + UI | Time-stamped KPI values per incident. Written by Worker jobs or UI; consumed by scorecards. |
 
@@ -174,6 +178,131 @@ Computed on the fly for the FixedFooterBar and MetricsSidebar. Never persisted.
 | `affectedUsers` | `number` | Customer count from `alert.customerCount`. |
 | `currentPhaseLabel` | `string` | Human-readable phase name. |
 | `updatesPosted` | `number` | Total published updates. |
+
+---
+
+### Run Cards
+
+The run card system uses a split storage model. See [Design Decisions](#design-decisions-resolved) for the rationale.
+
+**New enums:**
+
+| Type | Values |
+|---|---|
+| `RunCardTier` | `2 \| 3` — Tier 1 is a `.md` file; only Tiers 2 and 3 have D1 records |
+| `RunCardStatus` | `active` · `stale` · `draft` |
+| `AlarmLevel` | `Box0` · `Box1` · `Box2` · `Box3` |
+
+---
+
+#### Agency
+
+The Tier 1 entity. D1 holds structured metadata; the actual card content is a versioned `.md` file in the repository at `docs/runcards/agencies/{slug}.md`, controlled by the MIM team.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Agency identifier. |
+| `slug` | `string` | URL-safe short name. e.g. `accounting`, `platform-eng`. |
+| `name` | `string` | Display name. e.g. `Accounting & Finance`. |
+| `shortDescription` | `string` | One-line description of what this agency owns. |
+| `division` | `string` | Parent org division or business unit. |
+| `tier1CardPath` | `string \| null` | Repo-relative path to the `.md` file. e.g. `docs/runcards/agencies/accounting.md`. |
+| `defaultAlarmLevel` | `AlarmLevel` | Default dispatch tier for this agency. Overridden per-incident if needed. |
+| `mutualAidAgencies` | `string[]` | Agency IDs this agency depends on or that depend on it. |
+| `irsScore` | `number \| null` | Incident Readiness Score (0–100). Computed. Phase 5+. |
+| `createdAt` | `string` (ISO) | |
+| `updatedAt` | `string` (ISO) | |
+
+---
+
+#### RunCard
+
+Tier 2 (generic app class) or Tier 3 (specific named application). The `tier` field distinguishes them. Content shape varies by tier — stored as a typed JSON blob in `content`.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Run card identifier. |
+| `tier` | `RunCardTier` | `2` or `3`. |
+| `agencyId` | `string` | Parent agency (FK → `Agency.id`). |
+| `title` | `string` | Tier 2: system category name. Tier 3: application name. |
+| `status` | `RunCardStatus` | `active · stale · draft`. Stale = no update in 90 days. |
+| `ownerTeam` | `string \| null` | Team name. Null for Tier 2 until ownership transitions from MIM. |
+| `ownerEmail` | `string \| null` | Contact for Tier 3 cards. |
+| `content` | `RunCardContent` | Tier-specific content blob (see below). |
+| `version` | `number` | Monotonically incrementing. Starts at 1. |
+| `createdBy` | `string` | User ID of creator. |
+| `createdAt` | `string` (ISO) | |
+| `updatedAt` | `string` (ISO) | |
+| `lastUsedAt` | `string \| null` (ISO) | Last time this card was opened in a live incident. |
+| `incidentCount` | `number` | How many incidents have referenced this card. |
+
+---
+
+#### RunCardTier2Content
+
+The structured content blob for Tier 2 (generic app class) run cards.
+
+| Field | Type | Notes |
+|---|---|---|
+| `systemCategory` | `string` | Human label for the system class. e.g. `HR Systems`, `Payment Processing`. |
+| `typicalBusinessImpact` | `string` | What this class of outage typically affects. |
+| `alarmLevelDefaults` | `object` | Default alarm level by failure type: `{ fullOutage, degraded, dataIntegrity }` |
+| `canTemplate` | `object` | Pre-filled CAN structure: `{ conditions, actions, needs }` — starting text for MIM. |
+| `escalationPath` | `string[]` | Ordered contact chain within the owning division. |
+| `dependencies` | `string[]` | System categories or agency IDs that typically co-fail. |
+| `vendorSlaNote` | `string \| null` | Generic note on vendor RCA SLA expectations for this class. |
+| `notes` | `string \| null` | Freeform MIM notes. |
+
+---
+
+#### RunCardTier3Content
+
+The structured content blob for Tier 3 (specific application) run cards. Written and maintained by the technical team.
+
+| Field | Type | Notes |
+|---|---|---|
+| `applicationName` | `string` | Canonical application name. |
+| `onCallRotation` | `string` | Rotation name or link. |
+| `healthCheckUrls` | `string[]` | Direct health check endpoint URLs. |
+| `dashboardUrls` | `string[]` | Monitoring dashboard links. |
+| `runbookUrl` | `string \| null` | Link to the technical runbook. The run card references it — does not replace it. |
+| `vendorEscalationContacts` | `VendorContact[]` | Named contacts with priority-level mappings. |
+| `knownFailureModes` | `FailureMode[]` | Documented failure patterns with fingerprints and first-response actions. |
+| `rto` | `string \| null` | Recovery Time Objective. e.g. `4 hours`. |
+| `rpo` | `string \| null` | Recovery Point Objective. |
+| `releaseCriteria` | `string[]` | Application-specific conditions that must be true before MIM marks this system recovered. |
+| `notes` | `string \| null` | Team notes. Freeform. |
+
+---
+
+#### RunCardVersion
+
+Immutable snapshot saved on every run card update. Powers the CSI loop and the Incident Readiness Score.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Version record identifier. |
+| `runCardId` | `string` | FK → `RunCard.id`. |
+| `version` | `number` | Version number at time of snapshot. |
+| `content` | `RunCardContent` | Full content snapshot. |
+| `changedBy` | `string` | User ID. |
+| `changedAt` | `string` (ISO) | |
+| `changeReason` | `string \| null` | Optional note on what changed and why. e.g. `Post-major CSI update — INC-247`. |
+
+---
+
+#### IncidentRunCard
+
+Junction table. Records which run cards were opened during a specific incident and at which tier. Feeds the CSI loop — after the incident closes, every linked card gets a review prompt.
+
+| Field | Type | Notes |
+|---|---|---|
+| `incidentId` | `string` | FK → `Incident.id`. |
+| `agencyId` | `string \| null` | Set if a Tier 1 card was referenced (even if content is `.md`). |
+| `runCardId` | `string \| null` | Set for Tier 2 or Tier 3 cards. |
+| `tier` | `RunCardTier \| 1` | Which tier was active. `1` = agency card only. |
+| `linkedAt` | `string` (ISO) | When the MIM opened this card during the incident. |
+| `notes` | `string \| null` | MIM note on card relevance or gaps noticed during the incident. |
 
 <!-- DATA_DICTIONARY_END -->
 
@@ -336,15 +465,121 @@ Backend tables. Field names follow SQL snake_case convention. TypeScript types a
 
 ---
 
+### agencies
+
+Tier 1 run card metadata. The actual card content is a `.md` file in the repository. D1 holds the structured record for relationships, search, and IRS scoring.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `slug` | `TEXT` | URL-safe short name. Unique. e.g. `accounting`. |
+| `name` | `TEXT` | Display name. e.g. `Accounting & Finance`. |
+| `short_description` | `TEXT` | One-line description of systems owned. |
+| `division` | `TEXT` | Parent org division. |
+| `tier1_card_path` | `TEXT \| NULL` | Repo-relative path to the `.md` file. Null = no card authored yet. |
+| `default_alarm_level` | `TEXT` | `box0 · box1 · box2 · box3` |
+| `mutual_aid_agencies` | `TEXT` | JSON array of agency slugs. |
+| `irs_score` | `INTEGER \| NULL` | Incident Readiness Score (0–100). Computed by Worker. Phase 5+. |
+| `created_at` | `INTEGER` | Unix timestamp (ms). |
+| `updated_at` | `INTEGER` | Unix timestamp (ms). |
+
+**Primary key:** `id`
+**Unique index:** `slug`
+**Indexes:** `division`
+
+---
+
+### runcards
+
+Tier 2 (generic app class) and Tier 3 (specific app) run cards. Tier 1 content lives in `.md` files; only the agency metadata row in `agencies` represents Tier 1 in D1.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `tier` | `INTEGER` | `2` or `3`. |
+| `agency_id` | `TEXT` | Foreign key → `agencies.id`. |
+| `title` | `TEXT` | Tier 2: system category name. Tier 3: application name. |
+| `status` | `TEXT` | `active · stale · draft`. Worker sets `stale` when `updated_at` > 90 days. |
+| `owner_team` | `TEXT \| NULL` | Owning team name. Null for Tier 2 until ownership transitions from MIM. |
+| `owner_email` | `TEXT \| NULL` | Owning team contact. Primarily for Tier 3. |
+| `content` | `TEXT` | JSON blob. Shape differs by tier — see `RunCardTier2Content` / `RunCardTier3Content`. |
+| `version` | `INTEGER` | Monotonically incrementing. Starts at 1. |
+| `created_by` | `TEXT` | User ID of creator. |
+| `created_at` | `INTEGER` | Unix timestamp (ms). |
+| `updated_at` | `INTEGER` | Unix timestamp (ms). |
+| `last_used_at` | `INTEGER \| NULL` | Unix timestamp (ms). Set when this card is linked to an incident. |
+| `incident_count` | `INTEGER` | Denormalized count of incident references. Updated on `incident_runcards` insert. |
+
+**Primary key:** `id`
+**Indexes:** `tier`, `agency_id`, `status`, `updated_at`
+
+---
+
+### runcard_versions
+
+Immutable snapshot written on every save. Never updated after insert.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `runcard_id` | `TEXT` | Foreign key → `runcards.id`. |
+| `version` | `INTEGER` | Version number matching `runcards.version` at time of snapshot. |
+| `content` | `TEXT` | Full JSON content snapshot. |
+| `changed_by` | `TEXT` | User ID. |
+| `changed_at` | `INTEGER` | Unix timestamp (ms). |
+| `change_reason` | `TEXT \| NULL` | e.g. `Post-major CSI — INC-247`. Links changes back to incidents. |
+
+**Primary key:** `id`
+**Indexes:** `runcard_id`, `changed_at`
+**Unique index:** `(runcard_id, version)` — no two versions share the same number for a given card.
+
+---
+
+### incident_runcards
+
+Junction table. Tracks which run cards were opened during each incident and at which tier. Every row is a CSI trigger — after the incident resolves, each linked card receives a review prompt.
+
+| Column | Type | Notes |
+|---|---|---|
+| `incident_id` | `TEXT` | Foreign key → `incidents.id`. |
+| `agency_id` | `TEXT \| NULL` | Set when a Tier 1 agency was referenced (even if card content is a `.md` file). |
+| `runcard_id` | `TEXT \| NULL` | Set for Tier 2 or Tier 3 card references. Null if only Tier 1 was consulted. |
+| `tier` | `INTEGER` | `1 · 2 · 3` — which tier was active for this reference. |
+| `linked_at` | `INTEGER` | Unix timestamp (ms). When the MIM opened the card during the incident. |
+| `notes` | `TEXT \| NULL` | MIM observation on gaps or issues. Feeds the CSI loop and card update prompts. |
+
+**Primary key:** `(incident_id, agency_id, runcard_id)` — composite prevents duplicate links.
+**Indexes:** `incident_id`, `runcard_id`, `agency_id`
+
+---
+
 ## Relationships
 
 ```
-User (1) ──── (many) incidents          [opened_by, mim]
+User (1) ──── (many) incidents               [opened_by, mim]
 Incident (1) ──── (many) timeline_events
 Incident (1) ──── (many) status_updates
 Incident (1) ──── (many) milestones
 KpiDefinition (1) ──── (many) KpiObservation
 Incident (1) ──── (many) KpiObservation
+
+Agency (1) ──── (many) runcards              [agency_id]
+RunCard (1) ──── (many) runcard_versions     [runcard_id]
+Incident (many) ── (many) Agency             [via incident_runcards]
+Incident (many) ── (many) RunCard            [via incident_runcards]
+```
+
+**Run card storage:**
+```
+Tier 1 (Agency)
+  ├── D1: agencies table          ← metadata, contacts, IRS score, slug
+  └── Git: docs/runcards/agencies/{slug}.md  ← card content, MIM-controlled
+
+Tier 2 (Generic App)
+  └── D1: runcards (tier=2)       ← full structured content + version history
+
+Tier 3 (Specific App)
+  └── D1: runcards (tier=3)       ← self-service by technical teams
 ```
 
 ---
@@ -388,7 +623,10 @@ Previously tracked as open questions. Resolved through implementation.
 | **Who can post to the timeline?** | Any participant. `actor` field captures display name. The MIM is not the only voice. |
 | **ULID vs UUID** | ULID for all production IDs. Sortable by creation time, which is essential for incident timelines. Mock data uses numeric IDs for simplicity. |
 | **Cloudflare Access identity claim** | `email` is the `User.id`. Human-readable, stable, and what Access reliably provides via the JWT identity endpoint. |
+| **Run card Tier 1 storage** | Tier 1 (Agency) card *content* lives as `.md` files in the repo, MIM-controlled and git-versioned. D1 holds the agency *metadata* record (slug, contacts, default alarm level, IRS score) so the app can query, link, and score agencies without parsing markdown. Tier 2 and Tier 3 live entirely in D1. |
+| **Run card versioning** | Every save to a Tier 2 or Tier 3 card writes an immutable row to `runcard_versions`. Tier 1 versioning is handled by git. The `change_reason` field links card updates back to specific incidents, enabling the CSI loop. |
+| **IRS score computation** | Computed by a scheduled Worker — not written by the UI. Stored in `agencies.irs_score`. Phase 5+ feature; schema supports it now so the column exists when the Worker ships. |
 
 ---
 
-*Last updated: 2026-03-07 — Reflects `apps/web/src/types/index.ts` v1 (mock data build). D1 schema is design intent, not yet migrated.*
+*Last updated: 2026-03-09 — Reflects `apps/web/src/types/index.ts` v1 (mock data build). D1 schema is design intent, not yet migrated.*

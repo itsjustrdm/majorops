@@ -1,0 +1,8 @@
+# Copy this file to .dev.vars and fill in values for local development.
+# .dev.vars is gitignored — never commit the real file.
+#
+# Wrangler loads .dev.vars automatically when you run: wrangler dev
+
+JWT_SECRET=dev-local-secret-replace-me
+CF_ACCESS_AUD=
+ENVIRONMENT=development

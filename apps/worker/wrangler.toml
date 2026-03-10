@@ -1,0 +1,21 @@
+name = "majorops-api"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# ── D1 Database ───────────────────────────────────────────────────────────────
+# ONE database for production.
+# When you run `wrangler dev` locally, Wrangler creates a local SQLite file
+# automatically — it never touches this production DB.
+# Local DB lives at: .wrangler/state/v3/d1/ (gitignored)
+#
+# After running: wrangler d1 create majorops-production
+# paste the database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "majorops-production"
+database_id = "REPLACE_WITH_YOUR_DB_ID"
+
+# ── Routes (production only) ──────────────────────────────────────────────────
+[[routes]]
+pattern = "api.mim.run/*"
+zone_name = "mim.run"
