@@ -18,17 +18,24 @@ dist/
 .dev.vars
 .wrangler/
 
+# ── Vite / Node env files ─────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# .env.example and .dev.vars.example are committed (they have no real values)
+
 # ── Archives and large pre-migration artifacts ────────────────────
 *.zip
 tmp/
 output/
 
-# ── Superseded by MkDocs (migrated to docs/) ─────────────────────
+# ── Superseded / legacy (migrated or archived) ───────────────────
 github-publish/
-
-# ── Raw Obsidian vaults (consolidated into docs/) ─────────────────
 older obsidian vaults to review/
 DOMAINS.md
+
+# ── Stray build artifacts ─────────────────────────────────────────
+apps/cli/
 
 # ── macOS metadata ────────────────────────────────────────────────
 .DS_Store
