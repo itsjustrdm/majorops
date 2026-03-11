@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Incident Diagram Builder — MajorOps</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg:      #141414;
+    --surface: #1c1c1c;
+    --raised:  #242424;
+    --border:  #2e2e2e;
+    --text:    rgba(242,242,242,0.87);
+    --dim:     rgba(200,200,200,0.45);
+    --red:     #cc0000;
+    --red-hi:  #ff3333;
+    --amber:   #f59e0b;
+    --green:   #22c55e;
+    --blue:    #3b82f6;
+    --mono:    'IBM Plex Mono', 'Fira Mono', monospace;
+    --sans:    'IBM Plex Sans', system-ui, sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 14px; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
+
+  /* NAV */
+  .topnav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px; height: 44px;
+    background: #0f0f0f; border-bottom: 1px solid var(--border);
+  }
+  .wordmark { font-family: var(--mono); font-size: 13px; letter-spacing: 0.08em; color: var(--red); font-weight: 700; }
+  .wordmark span { color: var(--text); font-weight: 400; }
+  .nav-label { font-family: var(--mono); font-size: 11px; color: var(--dim); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* LAYOUT */
+  .shell {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    height: calc(100vh - 44px);
+    overflow: hidden;
+  }
+  .editor-col {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .preview-col {
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex; gap: 0;
+    border-bottom: 1px solid var(--border);
+    background: #0f0f0f;
+    flex-shrink: 0;
+  }
+  .tab {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.05em;
+    text-transform: uppercase; padding: 10px 16px;
+    color: var(--dim); cursor: pointer;
+    border-bottom: 2px solid transparent;
+    background: none; border-top: none; border-left: none; border-right: none;
+    transition: color 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--red); }
+
+  /* EDITOR */
+  .editor-body { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .code-editor {
+    flex: 1;
+    width: 100%;
+    background: var(--bg);
+    border: none;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.7;
+    padding: 16px;
+    resize: none;
+    outline: none;
+    overflow-y: auto;
+  }
+  .editor-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .editor-hint { font-family: var(--mono); font-size: 10px; color: var(--dim); }
+
+  /* TEMPLATE PICKER */
+  .template-list { padding: 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+  .template-card {
+    padding: 12px 14px; background: var(--raised);
+    border: 1px solid var(--border); cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .template-card:hover { border-color: var(--red); }
+  .template-card.active { border-color: var(--red); background: rgba(204,0,0,0.06); }
+  .template-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .template-desc { font-size: 11px; color: var(--dim); line-height: 1.5; }
+  .template-tag {
+    display: inline-block; font-family: var(--mono); font-size: 9px;
+    padding: 1px 6px; border: 1px solid var(--border); color: var(--dim);
+    margin-top: 6px; margin-right: 4px; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .template-tag.red   { border-color: rgba(204,0,0,0.4); color: var(--red-hi); }
+  .template-tag.amber { border-color: rgba(245,158,11,0.4); color: var(--amber); }
+  .template-tag.blue  { border-color: rgba(59,130,246,0.4); color: var(--blue); }
+  .template-tag.green { border-color: rgba(34,197,94,0.4); color: var(--green); }
+
+  /* PREVIEW */
+  .preview-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-bottom: 1px solid var(--border);
+    background: #0f0f0f; flex-shrink: 0;
+  }
+  .preview-title { font-family: var(--mono); font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em; }
+  .preview-body {
+    flex: 1; overflow: auto; padding: 24px;
+    display: flex; align-items: flex-start; justify-content: center;
+  }
+  #diagram-output {
+    width: 100%;
+    min-height: 200px;
+  }
+  #diagram-output svg {
+    max-width: 100%;
+    background: white;
+    padding: 16px;
+  }
+
+  /* NOTES PANEL */
+  .notes-panel { padding: 16px; overflow-y: auto; flex: 1; }
+  .note-section { margin-bottom: 20px; }
+  .note-heading {
+    font-family: var(--mono); font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--dim);
+    padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 10px;
+  }
+  .note-text { font-size: 12px; color: rgba(242,242,242,0.72); line-height: 1.65; }
+  .note-text code {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--raised); padding: 1px 5px;
+    border: 1px solid var(--border); color: var(--amber);
+  }
+  .note-text strong { color: var(--text); font-weight: 600; }
+
+  /* BUTTONS */
+  .btn {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 7px 14px;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text);
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--raised); }
+  .btn-primary { border-color: var(--red); background: rgba(204,0,0,0.12); color: var(--red-hi); }
+  .btn-primary:hover { background: rgba(204,0,0,0.2); }
+  .btn-sm { padding: 5px 10px; font-size: 10px; }
+
+  .error-box {
+    background: rgba(204,0,0,0.08); border: 1px solid rgba(204,0,0,0.3);
+    color: var(--red-hi); font-family: var(--mono); font-size: 11px;
+    padding: 10px 14px; margin: 16px; line-height: 1.6;
+    white-space: pre-wrap;
+  }
+
+  /* COPY FEEDBACK */
+  .copy-feedback {
+    font-family: var(--mono); font-size: 10px; color: var(--green);
+    opacity: 0; transition: opacity 0.3s;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .copy-feedback.show { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; grid-template-rows: 50vh 50vh; }
+    .editor-col { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="wordmark">&gt;MAJOR<span>ops</span></div>
+  <div class="nav-label">Incident Diagram Builder</div>
+  <button class="btn btn-sm" onclick="copyCode()">Copy Code</button>
+</nav>
+
+<div class="shell">
+
+  <!-- LEFT: EDITOR + TEMPLATES -->
+  <div class="editor-col">
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('editor', this)">Code Editor</button>
+      <button class="tab" onclick="switchTab('templates', this)">Templates</button>
+      <button class="tab" onclick="switchTab('notes', this)">Syntax Notes</button>
+    </div>
+
+    <!-- EDITOR -->
+    <div id="tab-editor" class="editor-body">
+      <textarea class="code-editor" id="mermaid-code" spellcheck="false" oninput="renderDiagram()"></textarea>
+      <div class="editor-footer">
+        <span class="editor-hint" id="render-status">Ready</span>
+        <span class="copy-feedback" id="copy-feedback">Copied!</span>
+      </div>
+    </div>
+
+    <!-- TEMPLATES -->
+    <div id="tab-templates" class="editor-body" style="display:none;">
+      <div class="template-list" id="template-list"></div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="tab-notes" class="editor-body" style="display:none;">
+      <div class="notes-panel">
+
+        <div class="note-section">
+          <div class="note-heading">Gantt — Best For Parallel Workstreams</div>
+          <div class="note-text">
+            Use <code>dateFormat HH:mm</code> with real incident times — much cleaner than the
+            <code>dateFormat X</code> (Unix ms) workaround. Tasks can be <code>crit</code> (red),
+            <code>done</code> (grey), or default (blue). Use <code>milestone</code> for zero-duration events.<br><br>
+            <strong>Key syntax:</strong><br>
+            <code>taskName :crit, id, HH:mm, Xm</code><br>
+            <code>taskName :milestone, id, HH:mm, 0m</code><br>
+            <code>taskName :after id, Xm</code> — relative to another task
+          </div>
+        </div>
+
+        <div class="note-section">
+          <div class="note-heading">Timeline — Best For Narrative Chronology</div>
+          <div class="note-text">
+            The <code>timeline</code> type (Mermaid v9.4+) is ideal for a quick readable summary.
+            Group events by section. Each event can have multiple notes on separate lines.
+            Simple, no duration tracking — purely sequential.<br><br>
+            <strong>Key syntax:</strong><br>
+            <code>section Phase Name</code><br>
+            <code>  HH:mm : Event label : Note</code>
+          </div>
+        </div>
+
+        <div class="note-section">
+          <div class="note-heading">Sequence — Best For Role Handoffs</div>
+          <div class="note-text">
+            Use <code>sequenceDiagram</code> to show <em>who talks to whom</em> — escalations,
+            acknowledgments, updates between MIM / TECH / COMMS / Leadership.
+            Supports activation boxes (<code>activate</code>/<code>deactivate</code>) to show
+            when someone "owns" the call.<br><br>
+            <strong>Key syntax:</strong><br>
+            <code>MIM->>TECH: Assign investigation</code><br>
+            <code>TECH-->>MIM: Root cause confirmed</code><br>
+            <code>Note over MIM,COMMS: Bridge active</code>
+          </div>
+        </div>
+
+        <div class="note-section">
+          <div class="note-heading">Flowchart — Best For Decision Trees</div>
+          <div class="note-text">
+            Use <code>flowchart TD</code> (top-down) or <code>LR</code> (left-right) for
+            escalation paths, runcard decision trees, or phase transition logic.<br><br>
+            <strong>Key syntax:</strong><br>
+            <code>A[Box-3 Alert] --> B{MIM Available?}</code><br>
+            <code>B -->|Yes| C[Assume Command]</code><br>
+            <code>B -->|No| D[Escalate to On-Call]</code>
+          </div>
+        </div>
+
+        <div class="note-section">
+          <div class="note-heading">MkDocs Integration</div>
+          <div class="note-text">
+            Copy the code and paste it directly into any <code>.md</code> file in the docs folder
+            inside a fenced block:<br><br>
+            <code>```mermaid</code><br>
+            <code>gantt</code><br>
+            <code>  ...</code><br>
+            <code>```</code><br><br>
+            Your <code>mkdocs.yml</code> already has Mermaid configured with the <code>superfences</code>
+            extension and the <code>mermaid-init.js</code> script. It will render automatically.
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /editor-col -->
+
+  <!-- RIGHT: PREVIEW -->
+  <div class="preview-col">
+    <div class="preview-header">
+      <span class="preview-title">Live Preview</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-sm" onclick="renderDiagram()">Re-render</button>
+      </div>
+    </div>
+    <div class="preview-body">
+      <div id="diagram-output"></div>
+    </div>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'default',
+  gantt: {
+    axisFormat: '%H:%M',
+    tickInterval: '15minutes',
+    useWidth: 900,
+  },
+  sequence: { useMaxWidth: false },
+  timeline: { useMaxWidth: false },
+});
+
+// ── Templates ────────────────────────────────────────────────────────────────
+
+const TEMPLATES = [
+  {
+    id: 'gantt-parallel',
+    name: 'Parallel Workstreams — Gantt',
+    desc: 'Three concurrent tracks: Comms, Engineering, and Command phases. Uses real HH:mm timestamps. Best for a full incident debrief or After Action.',
+    tags: [['gantt','red'],['parallel','amber'],['after action','blue']],
+    code: `gantt
+    title INC-2024-0847 — Payment Processing Degradation
+    dateFormat HH:mm
+    axisFormat %H:%M
+
+    section Detection & Comms
+    Alert Received                :milestone, m1, 14:22, 0m
+    Bridge Opened                 :a1, 14:23, 2m
+    Initial Stakeholder Update    :a2, 14:31, 8m
+    Stakeholder Update 2          :a3, 15:09, 6m
+    All-Clear Comms               :a4, 15:33, 5m
+
+    section Engineering
+    Initial Triage                :b1, 14:25, 9m
+    RCA — DB Connection Pool      :crit, b2, 14:34, 18m
+    RDS Proxy Config Change       :done, b3, 14:52, 12m
+    Pod Restarts (12/12)          :done, b4, 14:53, 15m
+    Error Rate Validation         :b5, 15:08, 10m
+    Post-Fix Soak                 :b6, 15:18, 20m
+
+    section Command Phases
+    Phase 1 · Alert               :crit, c1, 14:22, 3m
+    Phase 2 · Gather              :crit, c2, 14:25, 6m
+    Phase 3 · Assess              :crit, c3, 14:31, 7m
+    Phase 4 · Initial Command     :crit, c4, 14:38, 25m
+    Phase 5 · Isolation           :crit, c5, 15:03, 30m
+    Phase 6 · Mitigation          :c6, 15:33, 20m
+    Phase 7 · Validation          :c7, 15:53, 10m
+    Phase 8 · Resolution          :milestone, m2, 16:03, 0m`
+  },
+  {
+    id: 'timeline-narrative',
+    name: 'Incident Narrative — Timeline',
+    desc: 'Chronological event-by-event view grouped by phase. Cleaner and more readable than Gantt. Best for a quick summary or MIM handover brief.',
+    tags: [['timeline','blue'],['narrative','amber'],['summary','green']],
+    code: `timeline
+    title INC-2024-0847 · Payment Processing Degradation
+
+    section Pre-Incident
+        Background : Payment processor health checks degraded silently for ~8 minutes before alert fired
+
+    section Phase 1–2 · Alert & Gather (14:22–14:31)
+        14:22 : Alert Received : PagerDuty Box-3 : Error rate 35% eu-west-1
+        14:23 : Bridge Opened : Zoom + bridge.mim.run distributed to on-call roster
+        14:27 : Command Team Confirmed : MIM · Tech Lead · Comms · Scribe all joined
+
+    section Phase 3–4 · Assess & Initial (14:31–15:03)
+        14:31 : Initial Stakeholder Update sent : "Investigating payment errors in EU"
+        14:34 : Run Card Attached : DB Connection Pool — Tier 2 Generic v2.1
+        14:38 : Root Cause Confirmed : RDS proxy exhaustion in eu-west-1a
+        14:52 : Fix Applied : RDS proxy config + rolling pod restart initiated
+        14:53 : Error rate dropping 35% → 12%
+
+    section Phase 5–6 · Isolation & Mitigation (15:03–15:53)
+        15:03 : Fault Isolated : Traffic rerouted away from eu-west-1a
+        15:09 : Stakeholder Update 2 : "Fix applied, recovering"
+        15:18 : Error rate below 2% — Soak period begins
+
+    section Phase 7–8 · Resolution (15:53–16:03)
+        15:53 : Validation Complete : All services nominal
+        16:03 : Incident Closed : Duration 1h 41m
+        16:10 : After Action scheduled for next business day`
+  },
+  {
+    id: 'sequence-handoffs',
+    name: 'Role Handoffs — Sequence Diagram',
+    desc: 'Shows who talks to whom and when. Escalations, acks, and updates between MIM, Tech Lead, Comms, and Leadership. Best for documenting communication flows.',
+    tags: [['sequence','blue'],['roles','amber'],['escalation','red']],
+    code: `sequenceDiagram
+    autonumber
+    participant PD as PagerDuty
+    participant MIM as MIM (Morrison)
+    participant TECH as Tech Lead (Chen)
+    participant COMMS as Comms (Patel)
+    participant LEAD as Leadership
+
+    PD->>MIM: Box-3 Alert — Payment errors 35% eu-west-1
+    activate MIM
+
+    MIM->>MIM: Declare incident INC-2024-0847
+    MIM->>TECH: Assign: Triage payment-api errors
+    MIM->>COMMS: Draft initial stakeholder update
+    MIM->>LEAD: Heads-up: Critical incident declared
+
+    activate TECH
+    TECH-->>MIM: Investigating — narrowing to DB layer
+
+    COMMS-->>MIM: Update drafted — ready to send
+    MIM->>COMMS: Approved — send to stakeholders
+
+    Note over MIM,TECH: 14:31–14:38 — Assess phase
+
+    TECH-->>MIM: Root cause confirmed: RDS proxy exhaustion eu-west-1a
+    MIM->>TECH: Apply RDS proxy config change + rolling restart
+    MIM->>COMMS: Draft update: "Fix in progress"
+
+    activate TECH
+    Note over TECH: 14:52 — Fix applied
+
+    TECH-->>MIM: Pods cycling — error rate dropping
+    deactivate TECH
+
+    MIM->>LEAD: Update: Fix applied, monitoring
+    LEAD-->>MIM: Acknowledged
+
+    Note over MIM,COMMS: 15:03 — Isolation phase
+
+    TECH-->>MIM: Error rate below 2% — ready to validate
+    MIM->>TECH: Confirm full validation checklist
+    TECH-->>MIM: Validation complete — all services nominal
+
+    MIM->>COMMS: Draft all-clear update
+    COMMS-->>MIM: Sent
+    MIM->>LEAD: Incident resolved — After Action to follow
+    deactivate MIM`
+  },
+  {
+    id: 'flowchart-escalation',
+    name: 'Alarm Level Escalation — Flowchart',
+    desc: 'Decision tree for Box-0 through Box-3 escalation. Who gets paged, what command structure is required, and when to declare a major incident.',
+    tags: [['flowchart','blue'],['escalation','red'],['runcard','amber']],
+    code: `flowchart TD
+    A([🔔 Alert Fires]) --> B{Alarm Level?}
+
+    B -->|Box-0| C[Team-level response\nNo MIM required]
+    B -->|Box-1| D[MIM notified\nMonitor only]
+    B -->|Box-2| E[MIM assumes command\nCore team assembled]
+    B -->|Box-3| F[MIM declares Major Incident\nFull command structure]
+
+    C --> C1[Resolve at team level]
+    D --> D1{Escalating?}
+    D1 -->|No| D2[Resolve at team level]
+    D1 -->|Yes| E
+
+    E --> E1[Open bridge\nAssign Tech Lead + Comms]
+    F --> F1[Open bridge\nFull command team\nLeadership notification]
+
+    E1 --> G{Root cause\nidentified?}
+    F1 --> G
+
+    G -->|Yes| H[Apply Run Card\nIssue initial command]
+    G -->|No| I[Continue assessment\nUpdate stakeholders every 20m]
+    I --> G
+
+    H --> J{Resolved?}
+    J -->|No| K[Advance phase\nReassess resources]
+    K --> G
+    J -->|Yes| L([✅ Close Incident\nSchedule After Action])
+
+    style A fill:#1c1c1c,stroke:#cc0000,color:#ff3333
+    style L fill:#1c1c1c,stroke:#22c55e,color:#22c55e
+    style F fill:#1c1c1c,stroke:#cc0000,color:#ff4444
+    style F1 fill:#1c1c1c,stroke:#cc0000,color:#ff4444`
+  },
+  {
+    id: 'gantt-runcard',
+    name: 'Run Card Execution — Gantt',
+    desc: 'Tracks run card steps as tasks against real incident time. Shows which steps were completed, which are in progress, and which are blocked. Good for After Action validation.',
+    tags: [['gantt','red'],['runcard','amber'],['steps','green']],
+    code: `gantt
+    title Run Card Execution — DB Connection Pool (Tier 2 v2.1)
+    dateFormat HH:mm
+    axisFormat %H:%M
+
+    section Diagnosis Steps
+    Step 1 · Check connection pool metrics    :done, s1, 14:34, 4m
+    Step 2 · Review RDS proxy error logs      :done, s2, 14:38, 6m
+    Step 3 · Confirm no upstream DB failure   :done, s3, 14:40, 4m
+
+    section Isolation Steps
+    Step 4 · Route traffic away from AZ       :done, s4, 15:03, 8m
+    Step 5 · Reduce pool max_connections      :done, s5, 14:52, 5m
+
+    section Recovery Steps
+    Step 6 · Apply RDS proxy config change    :done, s6, 14:52, 12m
+    Step 7 · Adjust max_connections permanent :crit, s7, 15:00, 0m
+    Step 8 · Rolling pod restart              :done, s8, 14:53, 15m
+    Step 9 · Validate error rate below 1%     :done, s9, 15:18, 10m
+
+    section Post-Incident
+    Step 10 · Update run card version         :s10, 16:10, 30m
+    Step 11 · Log IRS observation             :s11, 16:15, 15m`
+  },
+  {
+    id: 'blank-gantt',
+    name: '— Blank Gantt (Start Here)',
+    desc: 'Empty parallel workstream template. Edit the section names, times, and task names for your incident.',
+    tags: [['template','blue']],
+    code: `gantt
+    title Incident Title — INC-YYYY-XXXX
+    dateFormat HH:mm
+    axisFormat %H:%M
+
+    section Detection & Comms
+    Alert Received               :milestone, m1, 00:00, 0m
+    Initial Stakeholder Update   :a1, 00:05, 10m
+
+    section Engineering
+    Initial Triage               :b1, 00:02, 10m
+    Root Cause Investigation     :crit, b2, 00:12, 20m
+    Fix Applied                  :done, b3, 00:32, 15m
+
+    section Command Phases
+    Phase 1 · Alert              :crit, c1, 00:00, 3m
+    Phase 2 · Gather             :crit, c2, 00:03, 5m
+    Phase 3 · Assess             :crit, c3, 00:08, 10m
+    Phase 4 · Initial Command    :crit, c4, 00:18, 20m
+    Phase 8 · Resolution         :milestone, m2, 00:47, 0m`
+  },
+];
+
+// ── Tab switching ─────────────────────────────────────────────────────────────
+
+function switchTab(name, btn) {
+  ['editor','templates','notes'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = 'none';
+  });
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).style.display = 'flex';
+  btn.classList.add('active');
+}
+
+// ── Build template list ───────────────────────────────────────────────────────
+
+function buildTemplates() {
+  const list = document.getElementById('template-list');
+  TEMPLATES.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'template-card';
+    card.innerHTML = `
+      <div class="template-name">${t.name}</div>
+      <div class="template-desc">${t.desc}</div>
+      <div>${t.tags.map(([label, color]) => `<span class="template-tag ${color}">${label}</span>`).join('')}</div>
+    `;
+    card.onclick = () => {
+      document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+      document.getElementById('mermaid-code').value = t.code;
+      switchTab('editor', document.querySelector('.tab'));
+      renderDiagram();
+    };
+    list.appendChild(card);
+  });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+let renderTimer = null;
+
+async function renderDiagram() {
+  clearTimeout(renderTimer);
+  renderTimer = setTimeout(async () => {
+    const code = document.getElementById('mermaid-code').value.trim();
+    const output = document.getElementById('diagram-output');
+    const status = document.getElementById('render-status');
+    if (!code) { output.innerHTML = ''; return; }
+    try {
+      const id = 'mermaid-' + Date.now();
+      const { svg } = await mermaid.render(id, code);
+      output.innerHTML = svg;
+      status.textContent = 'Rendered ✓';
+      status.style.color = 'var(--green)';
+    } catch (e) {
+      output.innerHTML = `<div class="error-box">Syntax error:\n${e.message || e}</div>`;
+      status.textContent = 'Error';
+      status.style.color = 'var(--red-hi)';
+    }
+  }, 400);
+}
+
+function copyCode() {
+  const code = document.getElementById('mermaid-code').value;
+  navigator.clipboard.writeText('```mermaid\n' + code + '\n```').then(() => {
+    const fb = document.getElementById('copy-feedback');
+    fb.classList.add('show');
+    setTimeout(() => fb.classList.remove('show'), 2000);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+buildTemplates();
+// Load first template
+document.getElementById('mermaid-code').value = TEMPLATES[0].code;
+renderDiagram();
+</script>
+</body>
+</html>
