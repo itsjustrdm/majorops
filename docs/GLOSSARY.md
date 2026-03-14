@@ -47,6 +47,25 @@ The action of opening a MajorOps incident. Borrowed from public safety dispatch 
 
 ---
 
+## Bridge Control
+
+**Information Authority**
+The right to speak on the bridge, and the responsibility to be the source of truth for a domain, at a given moment. Information Authority is not a fixed role — it transfers. The MIM holds it by default. When a SME goes hands-on-keyboard on a recovery track, authority transfers to them. When they report back, it returns to the MIM. See `docs/philosophy/bridge-control.md`.
+
+**Information Authority Transfer**
+The explicit act of assigning or reclaiming the bridge floor. The MIM activates a SME: *"[Name] — you have the floor."* The SME reports back. The MIM acknowledges and reissues direction. Both transfers are verbal and deliberate — never implied.
+
+**Air Time Discipline**
+The practice of treating bridge communication as a shared, finite resource. Every word spoken draws from the bridge's attention. The MIM ensures air time is spent on Conditions, Actions, and Needs — not speculation, social conversation, or repetition of information already in the timeline.
+
+**Open Air Rule**
+If a question is asked on the bridge, it demands an answer. If an answer is not immediately available, the MIM parks it explicitly with a named person and a timeframe: *"[Name], get us the uptime figure. We'll come back in 10 minutes."* Open questions are never abandoned — they are resolved or explicitly deferred with accountability.
+
+**Guardian of Service**
+The MIM's operating frame during a major incident. The customers are already affected. The MIM's job is to protect them from prolonged impact — not to protect engineers from inconvenience. When escalation hesitation occurs, the Guardian doctrine applies: page now, de-escalate later if needed. See `docs/philosophy/escalation-doctrine.md`.
+
+---
+
 ## Communication Model
 
 **CAN (Conditions / Actions / Needs)**

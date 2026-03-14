@@ -36,6 +36,17 @@
 - As a Responder, I need a minimal “what’s needed now” panel (lead, cadence, current bet, blockers) so that I can act without backscrolling chat.
 - As a Responder, I need to log timeline events with one keyboard shortcut so that the timeline stays accurate without slowing work.
 
+## Customer Operations
+Customer Operations is a **tool-panel-only role**. They do not speak on the bridge and do not receive bridge air time. Their contribution flows through the tool panel, where they post impact statements, answer MIM questions, and validate client-side status. The output appears as MicroUpdates (`source = tool`) and surfaces in the MIM’s impact panel.
+
+- As a Customer Ops participant, I need a structured impact panel showing confirmed-affected client count, unverified-affected client count, and a severity categorization so that I can give the MIM accurate numbers without interrupting the bridge.
+- As a Customer Ops participant, I need a Q&A panel where the MIM can post direct questions (“Has Acme confirmed they’re seeing errors?”) and I can post structured answers so that client-specific data flows into the incident record without verbal interruption.
+- As a Customer Ops participant, I need to post client impact statements in plain text (“Acme reported errors starting at 14:32, confirmed on Payment API”) so that the MIM has attribution-ready language for stakeholder updates.
+- As a Customer Ops participant, I need a validation checklist I can work through after the MIM declares Mitigation (“Has Acme confirmed resolution?”, “Has CSAT outreach been initiated?”) so that client-facing recovery is explicit and tracked.
+- As a Customer Ops participant, I need read-only access to the active Milestones so that I can verify the customer-facing language before it publishes, without drafting or editing permissions.
+
+**Bridge discipline note:** Customer Ops is never called on for a verbal update. The MIM queries the panel tool, reads the response, and incorporates it into the next SitRep or Milestone. If a Customer Ops participant needs to raise an urgent issue (a client has escalated to an executive), they flag it in the tool panel with a `!HIGH` tag — the MIM decides when and how to incorporate it.
+
 ---
 
 ## KPI Source of Truth (cross-persona)

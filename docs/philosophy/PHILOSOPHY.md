@@ -112,6 +112,34 @@ The tech leads fix the system.
 
 ---
 
+## The Guardian of Service
+
+When a major incident is declared, the customers are already affected. The service is already broken.
+
+The MIM is not protecting engineers from an inconvenient page. The MIM is protecting customers from a longer outage.
+
+This is the Guardian doctrine: **we are the guardian of service, not the guardian of anyone's schedule.**
+
+Escalation hesitation — waiting, hoping the issue resolves, trying one more thing before calling the next team — is a choice. It is a choice to prioritize internal comfort over customer impact. MajorOps makes that choice explicit and names it as the wrong one.
+
+The cost of an unnecessary page is minutes of someone's time. The cost of a delayed escalation is hours of customer impact. These costs are not equal. **Page early. De-escalate later if you must.**
+
+See [Escalation Doctrine](escalation-doctrine.md) for the full framework, including automated guardrails and the organizational culture shift required.
+
+---
+
+## Bridge Control and Information Authority
+
+The bridge is a mission, not a meeting. Customer impact is accumulating in real time. Every word on the bridge has a cost — measured in the time it takes everyone to process it.
+
+At any moment on the bridge, exactly one person holds **Information Authority** — the right to speak and the responsibility to be the source of truth for their domain. The MIM holds it by default. When a SME goes hands-on-keyboard on a recovery track, authority transfers to them. When they report back, it returns to the MIM.
+
+A SME who goes silent during active recovery work is the equivalent of an officer in a vehicle pursuit who stops transmitting. The MIM cannot coordinate. Backup is blind. The outage extends — not because the fix was hard, but because the information did not flow.
+
+See [Bridge Control](bridge-control.md) for the full protocol, including the Open Air Rule and call discipline standards.
+
+---
+
 ## The CAN Methodology
 
 All bridge communication in MajorOps follows CAN:
@@ -135,6 +163,31 @@ MajorOps has two operating states, borrowed directly from military and emergency
 **Wartime** — A major incident is active. The logo switches. The terminal prompt blinks red. Command is engaged. Every responder knows their role. The structure is activated, not improvised.
 
 The critical insight is that **wartime performance is determined by peacetime preparation**. You cannot improvise structure under pressure. You build it first.
+
+---
+
+## Free Text Is Already Happening
+
+MIMs are not working in a vacuum before MajorOps. They are already doing all of this — in a Slack DM, a personal Notes document, a shared Google Doc that only five people know about, or an Excel sheet they keep on their desktop.
+
+During a major incident, a skilled MIM is already tracking:
+- Who is working which thread
+- What each team tried and what the result was
+- When the last stakeholder update went out
+- What the current hypothesis is
+- Who is blocking on what
+
+The problem is not that this data does not exist. The problem is that it exists in **unstructured, unqueryable, unauditable form** that evaporates the moment the incident closes.
+
+A month later, nobody can answer: How long did we spend in isolation before finding the root cause? What hypothesis did we try first and why did we abandon it? Which recovery path succeeded? When did the Customer Ops team confirm client-side impact?
+
+That data was all there. It just was not captured in a way that survives the incident.
+
+**MajorOps does not ask the MIM to change how they work. It gives structure to what they are already doing.**
+
+The free-text entry field exists because the first priority is capturing the information at all. The structure that surrounds it — recovery paths, hypothesis tracking, the CAD presence model, phase state — gives that information somewhere to live, a way to be queried, and a reason to trust it during the next incident or after action.
+
+The value is not the software. The value is that the Excel sheet on someone's desktop becomes a database row, and next quarter's team can learn from it.
 
 ---
 

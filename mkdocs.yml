@@ -40,6 +40,8 @@ nav:
     - Domains: DOMAINS.md
   - Command Structure:
     - IT-ICS Roles: philosophy/ICS-IT-STRUCTURE.md
+    - Bridge Control: philosophy/bridge-control.md
+    - Escalation Doctrine: philosophy/escalation-doctrine.md
   - Architecture:
     - Signal Flow: architecture/signal-flow.md
   - User Guide:

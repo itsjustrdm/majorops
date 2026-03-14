@@ -9,9 +9,13 @@
 | Entity | Layer | Description |
 |---|---|---|
 | `Incident` | D1 + UI | The top-level record. Opened when a major incident begins, closed when it resolves. |
+| `RecoveryPath` | D1 + UI | A parallel thread of technical work within an incident. Multiple concurrent paths per incident; each has its own phase and can regress. |
+| `Hypothesis` | D1 + UI | A proposed root cause or contributing factor. First-class entity with lifecycle: active → validated / eliminated / discarded. |
+| `MicroUpdate` | D1 + UI | Raw CAD-style note. The fast, unstructured fireground layer. Posted by any participant; distinct from published Milestones. |
+| `IncidentParticipant` | D1 + UI | CAD presence roster — who is on scene, in what role, and since when. Powers the presence model and rapid escalation flag. |
 | `TimelineEvent` | UI | A timestamped operational log entry. The fireground record. Posted by MIM or any participant. |
 | `StatusUpdate` | D1 + UI | A published status note with audience scope (`public` or `internal`). |
-| `Milestone` | D1 + UI | A structured summary cut from the fireground log. The unit of stakeholder and exec communication. |
+| `Milestone` | D1 + UI | A structured CAN SitRep cut from the fireground log. The unit of stakeholder and exec communication. |
 | `CommandTeam` | D1 + UI | The five assigned roles for an active incident. |
 | `AlertInfo` | D1 + UI | Intake metadata: source alert ID, customer count, external impact flag. |
 | `User` | D1 | A person with access to MajorOps. Role determines view routing and permissions. |
@@ -19,6 +23,8 @@
 | `RunCard` | D1 | Tier 2 (generic app) and Tier 3 (specific app) run card records. Self-service for Tier 3; MIM-authored for Tier 2. |
 | `RunCardVersion` | D1 | Immutable snapshot of a run card at each save. Feeds the CSI loop and IRS score. |
 | `IncidentRunCard` | D1 | Junction — which run cards were opened during a specific incident. |
+| `Team` | D1 | Pre-configured team roster. The authoritative list of team names used for structured paging. Not linked to user accounts in MVP. |
+| `TeamPage` | D1 | Dispatch record — when a team was paged and when they arrived on the bridge. The unit of team response KPI measurement. |
 | `KpiDefinition` | D1 + UI | Authoritative KPI metadata (slug, formula, targets, visibility). Feeds all scorecards. |
 | `KpiObservation` | D1 + UI | Time-stamped KPI values per incident. Written by Worker jobs or UI; consumed by scorecards. |
 
@@ -40,6 +46,10 @@ Canonical types for UI state and API payloads. Source: `apps/web/src/types/index
 | `TimelineEventType` | `phase` · `update` · `command` · `alert` · `action` |
 | `UpdateVisibility` | `public` · `internal` |
 | `RiskLevel` | `Low` · `Medium` · `High` |
+| `RecoveryPathStatus` | `active` · `successful` · `abandoned` · `paused` |
+| `HypothesisStatus` | `active` · `validated` · `eliminated` · `discarded` |
+| `MicroUpdateSource` | `bridge` · `tool` · `system` |
+| `ParticipantRole` | `mim` · `sre` · `leader` · `service_manager` · `customer_ops` · `validator` · `responder` · `observer` |
 
 ---
 
@@ -178,6 +188,153 @@ Computed on the fly for the FixedFooterBar and MetricsSidebar. Never persisted.
 | `affectedUsers` | `number` | Customer count from `alert.customerCount`. |
 | `currentPhaseLabel` | `string` | Human-readable phase name. |
 | `updatesPosted` | `number` | Total published updates. |
+
+---
+
+### RecoveryPath
+
+A parallel thread of technical work within an incident. Incidents routinely have two or more concurrent paths (e.g., "DB connection pool" and "Network L1 route"). Each path has its own phase state — and can **regress** independently. If the network path reaches Isolation and then discovers it was the wrong team, that path returns to Gather while the DB path continues at Mitigation.
+
+The `currentBet` field is the "what are we trying right now" that stakeholders and the MIM need to surface. It changes frequently; it is not the same as the incident title or description.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Path identifier. |
+| `incidentId` | `string` | FK → `Incident.id`. |
+| `title` | `string` | Short label for this track. e.g. `DB connection pool`, `Network L1`. |
+| `status` | `RecoveryPathStatus` | `active · successful · abandoned · paused` |
+| `phase` | `PhaseNumber` | Current phase for this path (1–8). **Can regress.** |
+| `phaseEnteredAt` | `string` (ISO) | When this path entered its current phase. |
+| `owner` | `string` | Display name or user ID of the lead SME on this track. |
+| `currentBet` | `string` | One-line description of what this track is currently attempting. |
+| `hypotheses` | `Hypothesis[]` | All hypotheses raised against this path. |
+| `openedAt` | `string` (ISO) | When this recovery path was opened. |
+| `closedAt` | `string \| null` (ISO) | Set on `successful` or `abandoned`. Null while active. |
+| `notes` | `string` | MIM's running notes on this path. |
+
+---
+
+### Hypothesis
+
+A proposed root cause or contributing factor — a "current bet" on why this is happening. Hypotheses are first-class entities, not just free text in the timeline. They have a lifecycle and can be tracked, validated, and explicitly eliminated, which is critical for the Learning Review.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Hypothesis identifier. |
+| `incidentId` | `string` | FK → `Incident.id`. |
+| `recoveryPathId` | `string \| null` | FK → `RecoveryPath.id`. Null if the hypothesis spans all paths or hasn't been assigned to one yet. |
+| `title` | `string` | One-line statement. e.g. `DB connection pool saturated by overnight batch job`. |
+| `status` | `HypothesisStatus` | `active · validated · eliminated · discarded` |
+| `evidence` | `string` | Supporting observations. What data led to this hypothesis? |
+| `raisedBy` | `string` | Display name of who proposed it. |
+| `raisedAt` | `string` (ISO) | When raised. |
+| `resolvedAt` | `string \| null` (ISO) | When validated or eliminated. Null while active. |
+| `resolution` | `string \| null` | How it was resolved — what confirmed or ruled it out. |
+
+**Status transitions:**
+- `active` → `validated`: confirmed as the root cause or contributing factor
+- `active` → `eliminated`: disproven with evidence; kept in the record
+- `active` → `discarded`: deprioritized without disproof; may be revisited
+
+Eliminated and discarded hypotheses are never deleted — they are part of the Learning Review record.
+
+---
+
+### MicroUpdate
+
+The raw, fast, unstructured layer of the fireground log. Distinct from `StatusUpdate` (published comms) and `Milestone` (structured CAN SitRep). MicroUpdates are how anyone on the incident posts a quick note — what they just saw, what they just tried, what the system just did.
+
+Think of a CAD system during a police pursuit: the officer calls out location, direction, speed — that's a MicroUpdate. The dispatcher may synthesize several calls into a broadcast — that's a Milestone.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | MicroUpdate identifier. |
+| `incidentId` | `string` | FK → `Incident.id`. |
+| `recoveryPathId` | `string \| null` | Path this update belongs to. Null = incident-wide. |
+| `milestoneId` | `string \| null` | Set when a Milestone "captures" this update as part of its source material. |
+| `content` | `string` | Raw free-text. No format required. CAN format is encouraged but not enforced. |
+| `author` | `string` | Display name of poster. Any participant can post. |
+| `timestamp` | `string` (ISO) | When posted. |
+| `source` | `MicroUpdateSource` | `bridge` (spoken on call, typed by MIM) · `tool` (submitted via tool panel) · `system` (automated event) |
+
+**Source values:**
+- `bridge` — the MIM or another participant types this while on the call; fast entry, no structure
+- `tool` — posted via the SME tool panel (e.g., the Validator's validation report, the Customer Ops impact note)
+- `system` — generated by automated events (guardrail page, phase advance trigger, escalation notice)
+
+---
+
+### IncidentParticipant
+
+The CAD presence model. The on-scene roster for an active incident — who joined, in what role, and when they left. This is not the same as the `CommandTeam` (which holds the five named command roles). `IncidentParticipant` captures everyone who is on the bridge or tool panel, including observers, validators, and on-call responders.
+
+**The leader presence signal:** When a participant with `role = leader` joins, `rapidEscalationFlag` is set to `true`. This is the digital equivalent of the chief pulling up on scene. It does not change anyone's behavior — it signals to the platform that command-level escalation decision-making is available immediately, without a phone call.
+
+| Field | Type | Notes |
+|---|---|---|
+| `incidentId` | `string` | FK → `Incident.id`. |
+| `userId` | `string` | User ID (email from Cloudflare Access). |
+| `displayName` | `string` | Human-readable name for the roster. |
+| `role` | `ParticipantRole` | `mim · sre · leader · service_manager · customer_ops · validator · responder · observer` |
+| `joinedAt` | `string` (ISO) | When they appeared on the bridge or tool panel. |
+| `leftAt` | `string \| null` (ISO) | When they departed. Null = currently on scene. |
+| `isOnScene` | `boolean` | Derived: `leftAt === null`. Updated in real-time. |
+| `isSilent` | `boolean` | True for `observer` and `leader` roles by default. Silent participants do not hold bridge air time. |
+| `rapidEscalationFlag` | `boolean` | Set when `role = leader` and `isOnScene = true`. Surfaces in the MIM view as a command presence indicator. |
+
+**Role definitions:**
+- `mim` — Major Incident Manager; owns the bridge
+- `sre` — Technical recovery lead
+- `leader` — IC / VP / Director; escalation authority on scene (silent by default)
+- `service_manager` — Service owner or liaison
+- `customer_ops` — Customer Operations; Q&A panel and client impact statements (see Personas)
+- `validator` — Tool-only participant; runs validation checks, posts results via tool panel, no bridge air time
+- `responder` — On-call engineer contributing to a recovery track
+- `observer` — Silent observer; no air time
+
+---
+
+### Team
+
+The pre-configured list of team names used for structured paging. In MVP, team names are selected from this list when a page is sent — no user account linkage required. This prevents the free-text drift that makes response metrics unqueryable (twenty variants of "Platform Engineering" become one canonical name).
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Team identifier. |
+| `name` | `string` | Canonical team name. e.g. `Platform Engineering`, `Database SRE`, `Network Operations`. |
+| `division` | `string` | Parent org division or department. |
+| `onCallRotation` | `string \| null` | PagerDuty rotation name or URL. Reference only — not used for actual paging in MVP. |
+| `defaultAlarmLevel` | `AlarmLevel` | Lowest alarm level at which this team should be dispatched by default. |
+| `isActive` | `boolean` | Soft-delete — inactive teams no longer appear in the dispatch picker. |
+| `createdAt` | `string` (ISO) | |
+
+---
+
+### TeamPage
+
+The dispatch record. Written by the MIM when they page a team during an incident. This is the unit of team response measurement — the equivalent of a CAD dispatch record: timestamp out, timestamp on scene.
+
+**MVP model:** The MIM selects a team from the `Team` list and records a free-text contact name (who specifically was reached). No user account verification. The arrival time is recorded when a participant with a matching team association joins the bridge, or manually by the MIM.
+
+**Phase 2 model:** The "I'm here" button on the MIM's dispatch panel lets the paged engineer confirm arrival with one click — setting `arrivedAt` precisely and linking to a `User` record for individual-level response scoring.
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | `string` (ULID) | Page record identifier. |
+| `incidentId` | `string` | FK → `Incident.id`. |
+| `teamId` | `string` | FK → `Team.id`. Structured — selected from the team list, not free text. |
+| `teamName` | `string` | Denormalized team name at time of page. Preserved even if `Team` record is later renamed. |
+| `contactName` | `string \| null` | Free-text — who specifically was paged. e.g. `Alex Kim (on-call)`. No account link in MVP. |
+| `pagedAt` | `string` (ISO) | When the MIM sent the page. Set by the MIM. |
+| `acknowledgedAt` | `string \| null` (ISO) | When the team acked the page (optional — not all paging systems surface this). |
+| `arrivedAt` | `string \| null` (ISO) | When the team joined the bridge. Set by MIM observation (MVP) or "I'm here" button (Phase 2). |
+| `pagedBy` | `string` | Display name of who sent the page (usually the MIM). |
+| `alarmLevel` | `AlarmLevel \| null` | Alarm level this page was dispatched at. Captured for response-time benchmarking by tier. |
+| `notes` | `string \| null` | MIM notes on the page. e.g. `Primary on-call didn't answer, escalated to secondary.` |
+
+**Derived metrics (computed by Worker, stored in `KpiObservation`):**
+- `page_to_bridge`: `arrivedAt - pagedAt` — team bridge arrival latency
+- `page_to_ack`: `acknowledgedAt - pagedAt` — acknowledgment latency (where available)
 
 ---
 
@@ -553,6 +710,126 @@ Junction table. Tracks which run cards were opened during each incident and at w
 
 ---
 
+### teams
+
+Pre-configured team roster. The MIM selects from this list when dispatching — no free text, no account linkage in MVP.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `name` | `TEXT` | Canonical team name. Unique. |
+| `division` | `TEXT` | Parent org division. |
+| `on_call_rotation` | `TEXT \| NULL` | Rotation name or URL. |
+| `default_alarm_level` | `TEXT` | `box0 · box1 · box2 · box3` |
+| `is_active` | `INTEGER` | Boolean (0/1). Inactive teams hidden from dispatch picker. |
+| `created_at` | `INTEGER` | Unix timestamp (ms). |
+
+**Primary key:** `id`
+**Unique index:** `name`
+**Indexes:** `division`, `is_active`
+
+---
+
+### team_pages
+
+Dispatch records. Written by MIM when a team is paged.
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `incident_id` | `TEXT` | Foreign key → `incidents.id`. |
+| `team_id` | `TEXT` | Foreign key → `teams.id`. Structured — from the team list. |
+| `team_name` | `TEXT` | Denormalized at time of page. |
+| `contact_name` | `TEXT \| NULL` | Free-text contact. No account link in MVP. |
+| `paged_at` | `INTEGER` | Unix timestamp (ms). Set by MIM. |
+| `acknowledged_at` | `INTEGER \| NULL` | Unix timestamp (ms). Optional. |
+| `arrived_at` | `INTEGER \| NULL` | Unix timestamp (ms). MIM-recorded or Phase 2 "I'm here" button. |
+| `paged_by` | `TEXT` | Display name of pager (typically MIM). |
+| `alarm_level` | `TEXT \| NULL` | `box0 · box1 · box2 · box3` — dispatch tier context. |
+| `notes` | `TEXT \| NULL` | MIM notes on the page. |
+
+**Primary key:** `id`
+**Indexes:** `incident_id`, `team_id`, `paged_at`
+
+---
+
+### recovery_paths
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `incident_id` | `TEXT` | Foreign key → `incidents.id`. |
+| `title` | `TEXT` | Short track label. |
+| `status` | `TEXT` | `active · successful · abandoned · paused` |
+| `phase` | `INTEGER` | 1–8. **Can regress** — not constrained to advance only. |
+| `phase_entered_at` | `INTEGER` | Unix timestamp (ms). When this path entered the current phase. |
+| `owner` | `TEXT` | Display name or user ID of the lead SME. |
+| `current_bet` | `TEXT` | What this track is currently attempting. |
+| `opened_at` | `INTEGER` | Unix timestamp (ms). |
+| `closed_at` | `INTEGER \| NULL` | Unix timestamp (ms). Set on successful or abandoned. |
+| `notes` | `TEXT` | MIM's running notes. |
+
+**Primary key:** `id`
+**Indexes:** `incident_id`, `status`, `opened_at`
+
+---
+
+### hypotheses
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `incident_id` | `TEXT` | Foreign key → `incidents.id`. |
+| `recovery_path_id` | `TEXT \| NULL` | Foreign key → `recovery_paths.id`. Null = spans all paths. |
+| `title` | `TEXT` | One-line hypothesis statement. |
+| `status` | `TEXT` | `active · validated · eliminated · discarded` |
+| `evidence` | `TEXT` | Supporting observations. |
+| `raised_by` | `TEXT` | Display name of proposer. |
+| `raised_at` | `INTEGER` | Unix timestamp (ms). |
+| `resolved_at` | `INTEGER \| NULL` | Unix timestamp (ms). Null while active. |
+| `resolution` | `TEXT \| NULL` | How it was confirmed or ruled out. |
+
+**Primary key:** `id`
+**Indexes:** `incident_id`, `recovery_path_id`, `status`, `raised_at`
+
+---
+
+### micro_updates
+
+| Column | Type | Notes |
+|---|---|---|
+| `id` | `TEXT` | Primary key (ULID). |
+| `incident_id` | `TEXT` | Foreign key → `incidents.id`. |
+| `recovery_path_id` | `TEXT \| NULL` | Foreign key → `recovery_paths.id`. Null = incident-wide. |
+| `milestone_id` | `TEXT \| NULL` | Foreign key → `milestones.id`. Set when a Milestone captures this update. |
+| `content` | `TEXT` | Raw free-text content. |
+| `author` | `TEXT` | Display name of poster. |
+| `created_at` | `INTEGER` | Unix timestamp (ms). |
+| `source` | `TEXT` | `bridge · tool · system` |
+
+**Primary key:** `id`
+**Indexes:** `incident_id`, `recovery_path_id`, `milestone_id`, `created_at`
+
+---
+
+### incident_participants
+
+| Column | Type | Notes |
+|---|---|---|
+| `incident_id` | `TEXT` | Foreign key → `incidents.id`. |
+| `user_id` | `TEXT` | User ID (email from Cloudflare Access). |
+| `display_name` | `TEXT` | Human-readable name. |
+| `role` | `TEXT` | `mim · sre · leader · service_manager · customer_ops · validator · responder · observer` |
+| `joined_at` | `INTEGER` | Unix timestamp (ms). |
+| `left_at` | `INTEGER \| NULL` | Unix timestamp (ms). Null = currently on scene. |
+| `is_silent` | `INTEGER` | Boolean (0/1). True for `observer` and `leader` by default. |
+| `rapid_escalation_flag` | `INTEGER` | Boolean (0/1). Set to 1 when `role = leader` and `left_at IS NULL`. |
+
+**Primary key:** `(incident_id, user_id, joined_at)` — allows re-join after departure.
+**Indexes:** `incident_id`, `user_id`, `role`
+
+---
+
 ## Relationships
 
 ```
@@ -560,6 +837,18 @@ User (1) ──── (many) incidents               [opened_by, mim]
 Incident (1) ──── (many) timeline_events
 Incident (1) ──── (many) status_updates
 Incident (1) ──── (many) milestones
+Incident (1) ──── (many) micro_updates
+Incident (1) ──── (many) recovery_paths
+Incident (1) ──── (many) hypotheses
+Incident (1) ──── (many) incident_participants
+
+RecoveryPath (1) ──── (many) hypotheses      [recovery_path_id]
+RecoveryPath (1) ──── (many) micro_updates   [recovery_path_id]
+Milestone (1) ──── (many) micro_updates      [milestone_id — capture relationship]
+
+Team (1) ──── (many) team_pages              [team_id]
+Incident (1) ──── (many) team_pages          [incident_id]
+
 KpiDefinition (1) ──── (many) KpiObservation
 Incident (1) ──── (many) KpiObservation
 
@@ -626,7 +915,16 @@ Previously tracked as open questions. Resolved through implementation.
 | **Run card Tier 1 storage** | Tier 1 (Agency) card *content* lives as `.md` files in the repo, MIM-controlled and git-versioned. D1 holds the agency *metadata* record (slug, contacts, default alarm level, IRS score) so the app can query, link, and score agencies without parsing markdown. Tier 2 and Tier 3 live entirely in D1. |
 | **Run card versioning** | Every save to a Tier 2 or Tier 3 card writes an immutable row to `runcard_versions`. Tier 1 versioning is handled by git. The `change_reason` field links card updates back to specific incidents, enabling the CSI loop. |
 | **IRS score computation** | Computed by a scheduled Worker — not written by the UI. Stored in `agencies.irs_score`. Phase 5+ feature; schema supports it now so the column exists when the Worker ships. |
+| **Recovery path phase regression** | `recovery_paths.phase` is not constrained to advance monotonically. A path that reaches Isolation and discovers it is the wrong team can regress to Gather. This is intentional — it reflects ground truth and is more useful in the Learning Review than an artificially advanced phase number. |
+| **Hypothesis lifecycle: never delete** | Eliminated and discarded hypotheses are never removed from the record. They appear in the Learning Review as "we tried this, here's why it was wrong." Removing them loses institutional knowledge. |
+| **MicroUpdate vs. StatusUpdate vs. Milestone** | Three distinct layers: `micro_updates` = raw fireground notes (any participant, any time, no format); `status_updates` = visibility-gated published communications (MIM or Comms, audience-aware); `milestones` = structured CAN SitReps (the unit that stakeholders and executives see). Milestones reference the micro_updates they were synthesized from via `milestone_id`. |
+| **CAD presence vs. command team** | `incident_participants` is the on-scene roster — everyone on the bridge or tool panel. `CommandTeam` (embedded in `incidents`) holds the five named command roles. These overlap but are not the same: a `leader` participant may be an observer-only presence; the `CommandTeam.leader` field is the named IC for the record. |
+| **Rapid escalation flag** | `rapid_escalation_flag` is set automatically when a `leader`-role participant joins with `left_at IS NULL`. It is informational — it surfaces in the MIM view as a presence indicator. It does not change permissions or trigger automated actions. Its meaning: "a command-level decision maker is on scene right now — use them if this path stalls." Analogous to the chief pulling up to the scene; it changes what's *possible*, not what's required. |
+| **Team name is structured, contact name is free text** | `team_pages.team_id` must reference a row in the `teams` table — no ad-hoc team names. This is what makes `team-page-to-bridge` queryable and comparable across incidents. `contact_name` is free text and is not used in any KPI calculation. This is intentional: you can write "Alex Kim (on-call)" without needing Alex to have an account. |
+| **Phase 2: "I'm here" button** | In MVP, `arrived_at` is set by the MIM manually when they observe the team joining. In Phase 2, a one-click "I'm here" button on the responder's view sets `arrived_at` precisely and optionally links to a `User` record for individual-level scoring. The schema supports both — `contact_name` becomes a user FK in Phase 2, and the `incident_participants` table already has `joined_at` for the individual-level record. |
+| **Validator as tool-only persona** | The `validator` participant role is explicitly tool-panel only. Validators post results via `micro_updates` with `source = tool`. They do not hold bridge air time. This is a deliberate bridge discipline decision — validation results are data inputs, not verbal reports. |
+| **Customer Ops as tool-only persona** | The `customer_ops` participant role interacts through the tool panel (Q&A, impact statements, client validation). They do not speak on the bridge. Their outputs flow into `micro_updates` with `source = tool` and are surfaced in the MIM's impact panel. |
 
 ---
 
-*Last updated: 2026-03-09 — Reflects `apps/web/src/types/index.ts` v1 (mock data build). D1 schema is design intent, not yet migrated.*
+*Last updated: 2026-03-13 — Added RecoveryPath, Hypothesis, MicroUpdate, IncidentParticipant, Team, TeamPage entities. D1 schema is design intent, not yet migrated.*
