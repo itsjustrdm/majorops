@@ -6,31 +6,41 @@
 
 ## The Core Asymmetry
 
-There is a cost to paging someone unnecessarily.
+There is a real cost to an unnecessary page.
 
-It is measured in minutes of interrupted sleep, a disrupted dinner, an annoyed engineer.
+There is also a cost to a delayed escalation — measured in hours of customer impact, degraded revenue, and an organization left asking why nobody called sooner.
 
-There is also a cost to a delayed escalation.
-
-It is measured in hours of customer impact, degraded revenue, eroded trust, and an organization left wondering why nobody called sooner.
-
-These two costs are not equal. They have never been equal. And yet most incident response cultures treat them as if they are — hedging, waiting, hoping the issue resolves before anyone else has to know.
+These costs are not equal. And yet most incident response cultures treat them as if they are — hedging, waiting, hoping the issue resolves before the next team has to be involved.
 
 MajorOps does not hedge.
 
 ---
 
+## On-Call Is the Contract
+
+Before anything else: MajorOps pages on-call rotations. Not named individuals. Not whoever an engineer thinks might know the system.
+
+Every team with a response obligation maintains an on-call rotation, managed by that team's rota manager. The rotation defines who is available, when, and at what alarm level. When MajorOps dispatches a team, it is activating that structure — not disrupting someone's evening at random.
+
+The on-call engineer is, in the operational sense, at work. They are the team's designated first responder for that shift. Paging them is not an imposition. It is the system working exactly as designed.
+
+**Named escalation — contacting a specific individual outside the on-call rotation — requires explicit authorization from the MIM or a leader on scene.** This is a rare, documented, conscious decision. It goes in the incident record. It is not the default. It is not what the automated guardrails do.
+
+The VP example: if a leader joins the bridge and says "we need Rajesh on this specifically" — that is a leadership-authorized named escalation. The MIM logs it, contacts Rajesh, and notes the reason. That is the correct process for an out-of-rotation page, and it requires a name and a reason, not just urgency.
+
+---
+
 ## The Guardian Doctrine
 
-When a major incident is declared, the customers are already affected. They are already bothered. The service is already broken.
+When a major incident is declared, the customers are already affected. The service is already broken.
 
-The MIM is not protecting engineers from inconvenience. The MIM is protecting customers from prolonged impact.
+The MIM is not protecting the on-call calendar. The MIM is protecting customers from a longer outage.
 
-That is the only frame that matters.
+That is the only frame that matters — and it is what makes the on-call structure worth having. Teams that build and maintain good rotations are the teams that can respond fast when it counts. The on-call commitment is how they protect both their customers and their off-shift colleagues. It distributes the burden so no single person carries it alone.
 
-> **We are the guardian of service. Not the guardian of anyone's sleep schedule.**
+> **We are the guardian of service. The on-call rotation is the team's commitment to that same mission.**
 
-The moment a team hesitates to page the next group because they don't want to "bother" anyone, they have made a choice: their comfort over the customer's. MajorOps makes that choice explicit — and wrong.
+The moment a team hesitates to activate the next group because they're not sure it's "bad enough yet," they have introduced delay at exactly the wrong moment. MajorOps makes the decision objective: the phase state, the guardrail threshold, the alarm level — not gut feel, not social pressure.
 
 ---
 
@@ -137,11 +147,13 @@ The result: **no hesitation, no awkward social friction, no waiting for permissi
 
 | Old model | MajorOps model |
 |---|---|
-| "Let's try a few more things before we wake anyone." | "Page now. De-escalate later if we don't need them." |
+| "Let's try a few more things before we call the next team." | "Activate the on-call. De-escalate later if we don't need them." |
 
-The old model protects engineers. The new model protects customers.
+The old model treats escalation as a social event — someone asking a favor, someone being bothered. The new model treats it as a structural act: activating a resource that was specifically prepared, staffed, and committed for exactly this situation.
 
-Only one of those is the job.
+No favor asked. No apology owed. The on-call team is on duty.
+
+**What about persistent response time problems?** That is what the KPIs are for. If a team's `team-page-to-bridge` metric shows consistent delays, that surfaces in the data — and the conversation happens between the rota manager and the team lead, not in the middle of a major incident. Metrics drive structural reform. The MIM at 2am is not the accountability mechanism. The platform is.
 
 ---
 

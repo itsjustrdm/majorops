@@ -116,15 +116,21 @@ The tech leads fix the system.
 
 When a major incident is declared, the customers are already affected. The service is already broken.
 
-The MIM is not protecting engineers from an inconvenient page. The MIM is protecting customers from a longer outage.
+The MIM is not protecting the on-call calendar. The MIM is protecting customers from a longer outage.
 
-This is the Guardian doctrine: **we are the guardian of service, not the guardian of anyone's schedule.**
+This is the Guardian doctrine: **we are the guardian of service. The on-call rotation is the team's commitment to that same mission.**
 
-Escalation hesitation — waiting, hoping the issue resolves, trying one more thing before calling the next team — is a choice. It is a choice to prioritize internal comfort over customer impact. MajorOps makes that choice explicit and names it as the wrong one.
+MajorOps pages on-call rotations — structured, managed, and committed to by each team's rota manager. When we activate a team, we are not asking a favor or disrupting someone's evening arbitrarily. We are calling the unit that prepared for this shift. That preparation is what makes the on-call contract worth having.
 
-The cost of an unnecessary page is minutes of someone's time. The cost of a delayed escalation is hours of customer impact. These costs are not equal. **Page early. De-escalate later if you must.**
+Escalation hesitation — waiting, hoping the issue resolves, trying one more thing before activating the next team — introduces delay at the moment that delay is most expensive. MajorOps makes the escalation decision objective: phase state, guardrail threshold, alarm level. Not gut feel. Not social pressure.
 
-See [Escalation Doctrine](escalation-doctrine.md) for the full framework, including automated guardrails and the organizational culture shift required.
+The only exception to on-call paging is a named escalation — contacting a specific individual outside the rotation. That requires explicit authorization from the MIM or a leader on scene, goes into the incident record, and is a rare, documented decision. It is not the default.
+
+If teams are consistently slow to respond to on-call pages, that shows up in the KPIs — and the rota manager has the staffing conversation. The platform surfaces the data. The manager drives the reform.
+
+**Page the on-call. De-escalate later if you must.**
+
+See [Escalation Doctrine](escalation-doctrine.md) for the full framework, including automated guardrails and the on-call paging protocol.
 
 ---
 
