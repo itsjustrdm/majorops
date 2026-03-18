@@ -1,4 +1,105 @@
-import type { Incident } from '../types'
+import type {
+  Incident, RecoveryPath, Hypothesis, MicroUpdate,
+  IncidentParticipant, Team, TeamPage
+} from '../types'
+
+// ─── Teams ────────────────────────────────────────────────────────────────────
+
+export const TEAMS: Team[] = [
+  { id: 't1', name: 'Platform Engineering',  division: 'Engineering',   onCallRotation: 'PagerDuty / platform-eng-oncall', defaultAlarmLevel: 'Box2', isActive: true },
+  { id: 't2', name: 'Database SRE',          division: 'Engineering',   onCallRotation: 'PagerDuty / db-sre-oncall',       defaultAlarmLevel: 'Box2', isActive: true },
+  { id: 't3', name: 'Network Operations',    division: 'Infrastructure', onCallRotation: 'PagerDuty / netops-oncall',      defaultAlarmLevel: 'Box2', isActive: true },
+  { id: 't4', name: 'Payments Engineering',  division: 'Engineering',   onCallRotation: 'PagerDuty / payments-oncall',     defaultAlarmLevel: 'Box3', isActive: true },
+  { id: 't5', name: 'Security Operations',   division: 'Security',      onCallRotation: 'PagerDuty / soc-oncall',          defaultAlarmLevel: 'Box2', isActive: true },
+  { id: 't6', name: 'Cloud Infrastructure',  division: 'Infrastructure', onCallRotation: 'PagerDuty / cloud-infra-oncall', defaultAlarmLevel: 'Box2', isActive: true },
+  { id: 't7', name: 'Customer Operations',   division: 'Operations',    onCallRotation: 'PagerDuty / custops-oncall',      defaultAlarmLevel: 'Box1', isActive: true },
+  { id: 't8', name: 'Auth & Identity',       division: 'Engineering',   onCallRotation: 'PagerDuty / auth-oncall',         defaultAlarmLevel: 'Box2', isActive: true },
+]
+
+// ─── Recovery paths + hypotheses for INC-1 ────────────────────────────────────
+
+const inc1Hypotheses: Hypothesis[] = [
+  {
+    id: 'h1', incidentId: '1', recoveryPathId: 'rp1',
+    title: 'Connection pool saturated by overnight batch job spike',
+    status: 'validated',
+    evidence: 'Pool metrics show 100% utilization starting 02:14 UTC. Batch job logs confirm 3x normal query volume during maintenance window.',
+    raisedBy: 'M. Torres', raisedAt: new Date(Date.now() - 1000 * 60 * 70).toISOString(),
+    resolvedAt: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+    resolution: 'Confirmed. Batch job query pattern changed — full table scans holding connections open.',
+  },
+  {
+    id: 'h2', incidentId: '1', recoveryPathId: 'rp1',
+    title: 'Recent config change caused pool size reduction',
+    status: 'eliminated',
+    evidence: 'Config history reviewed. No pool size changes in 6 days. Ruled out.',
+    raisedBy: 'M. Torres', raisedAt: new Date(Date.now() - 1000 * 60 * 65).toISOString(),
+    resolvedAt: new Date(Date.now() - 1000 * 60 * 55).toISOString(),
+    resolution: 'No pool config changes in last 6 days. Config drift ruled out.',
+  },
+  {
+    id: 'h3', incidentId: '1', recoveryPathId: 'rp2',
+    title: 'Fraud detection service holding transactions in queue',
+    status: 'active',
+    evidence: 'Fraud service queue depth is 3x normal. Investigating whether this is cause or effect of payment failures.',
+    raisedBy: 'R. Castillo', raisedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    resolvedAt: null, resolution: null,
+  },
+]
+
+const inc1RecoveryPaths: RecoveryPath[] = [
+  {
+    id: 'rp1', incidentId: '1',
+    title: 'DB Connection Pool',
+    status: 'successful',
+    phase: 6,
+    phaseEnteredAt: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+    owner: 'M. Torres',
+    currentBet: 'Increase pool size limit + kill stale connections from batch job',
+    hypotheses: inc1Hypotheses.filter(h => h.recoveryPathId === 'rp1'),
+    openedAt: new Date(Date.now() - 1000 * 60 * 72).toISOString(),
+    closedAt: null,
+    notes: 'Batch job was holding connections open with full table scans. Pool increase deployed. Monitoring recovery.',
+  },
+  {
+    id: 'rp2', incidentId: '1',
+    title: 'Fraud Detection Queue Backlog',
+    status: 'active',
+    phase: 3,
+    phaseEnteredAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
+    owner: 'J. Park',
+    currentBet: 'Drain fraud queue backlog, assess if it is blocking payment completion',
+    hypotheses: inc1Hypotheses.filter(h => h.recoveryPathId === 'rp2'),
+    openedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    closedAt: null,
+    notes: 'Opened after DB path identified. Fraud queue depth anomalous — may be secondary contributing factor.',
+  },
+]
+
+const inc1MicroUpdates: MicroUpdate[] = [
+  { id: 'mu1', incidentId: '1', recoveryPathId: 'rp1', milestoneId: null, content: 'DB pool at 100% utilization. Batch job still running. Killing long-running connections now.', author: 'M. Torres', timestamp: new Date(Date.now() - 1000 * 60 * 55).toISOString(), source: 'bridge' },
+  { id: 'mu2', incidentId: '1', recoveryPathId: null, milestoneId: 'm1', content: 'Stakeholder email sent. ETA committed at 60 minutes from now.', author: 'R. Castillo', timestamp: new Date(Date.now() - 1000 * 60 * 48).toISOString(), source: 'bridge' },
+  { id: 'mu3', incidentId: '1', recoveryPathId: 'rp1', milestoneId: null, content: 'Pool size increase deployed. Error rate dropping — from 40% to 22% over last 5 min. Continuing to monitor.', author: 'M. Torres', timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString(), source: 'bridge' },
+  { id: 'mu4', incidentId: '1', recoveryPathId: 'rp2', milestoneId: null, content: 'Fraud queue at 4,200 items vs normal 1,400. Investigating cause — may be independent or downstream of payment failures.', author: 'J. Park', timestamp: new Date(Date.now() - 1000 * 60 * 28).toISOString(), source: 'tool' },
+  { id: 'mu5', incidentId: '1', recoveryPathId: null, milestoneId: null, content: 'Acme Corp confirmed they are seeing errors starting 02:20 UTC. 47 failed transactions, all payment type.', author: 'K. Nguyen', timestamp: new Date(Date.now() - 1000 * 60 * 18).toISOString(), source: 'tool' },
+  { id: 'mu6', incidentId: '1', recoveryPathId: 'rp1', milestoneId: null, content: 'Error rate now 8%. Pool holding stable. Batch job terminated and rescheduled for off-peak. Watching for full recovery.', author: 'M. Torres', timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(), source: 'bridge' },
+]
+
+const inc1Participants: IncidentParticipant[] = [
+  { incidentId: '1', userId: 'r.castillo@company.com', displayName: 'R. Castillo', role: 'mim', joinedAt: new Date(Date.now() - 1000 * 60 * 85).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+  { incidentId: '1', userId: 'm.torres@company.com',   displayName: 'M. Torres',   role: 'sre', joinedAt: new Date(Date.now() - 1000 * 60 * 80).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+  { incidentId: '1', userId: 's.okafor@company.com',   displayName: 'S. Okafor',   role: 'leader', joinedAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), leftAt: null, isOnScene: true, isSilent: true, rapidEscalationFlag: true },
+  { incidentId: '1', userId: 'j.park@company.com',     displayName: 'J. Park',     role: 'service_manager', joinedAt: new Date(Date.now() - 1000 * 60 * 70).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+  { incidentId: '1', userId: 'k.nguyen@company.com',   displayName: 'K. Nguyen',   role: 'customer_ops', joinedAt: new Date(Date.now() - 1000 * 60 * 75).toISOString(), leftAt: null, isOnScene: true, isSilent: true, rapidEscalationFlag: false },
+  { incidentId: '1', userId: 'a.lin@company.com',      displayName: 'A. Lin',      role: 'validator', joinedAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(), leftAt: null, isOnScene: true, isSilent: true, rapidEscalationFlag: false },
+  { incidentId: '1', userId: 'b.chen@company.com',     displayName: 'B. Chen',     role: 'responder', joinedAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), leftAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(), isOnScene: false, isSilent: false, rapidEscalationFlag: false },
+]
+
+const inc1TeamPages: TeamPage[] = [
+  { id: 'tp1', incidentId: '1', teamId: 't4', teamName: 'Payments Engineering', contactName: 'M. Torres (on-call)', pagedAt: new Date(Date.now() - 1000 * 60 * 82).toISOString(), acknowledgedAt: new Date(Date.now() - 1000 * 60 * 79).toISOString(), arrivedAt: new Date(Date.now() - 1000 * 60 * 77).toISOString(), pagedBy: 'R. Castillo', alarmLevel: 'Box3', notes: null },
+  { id: 'tp2', incidentId: '1', teamId: 't2', teamName: 'Database SRE', contactName: 'J. Park (on-call)', pagedAt: new Date(Date.now() - 1000 * 60 * 72).toISOString(), acknowledgedAt: new Date(Date.now() - 1000 * 60 * 70).toISOString(), arrivedAt: new Date(Date.now() - 1000 * 60 * 68).toISOString(), pagedBy: 'R. Castillo', alarmLevel: 'Box3', notes: null },
+  { id: 'tp3', incidentId: '1', teamId: 't1', teamName: 'Platform Engineering', contactName: null, pagedAt: new Date(Date.now() - 1000 * 60 * 28).toISOString(), acknowledgedAt: null, arrivedAt: null, pagedBy: 'R. Castillo', alarmLevel: 'Box2', notes: 'Paged for fraud queue investigation. Awaiting response.' },
+]
 
 export const INCIDENTS: Incident[] = [
   {
@@ -164,6 +265,10 @@ export const INCIDENTS: Incident[] = [
         cutAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
       },
     ],
+    recoveryPaths: inc1RecoveryPaths,
+    microUpdates: inc1MicroUpdates,
+    participants: inc1Participants,
+    teamPages: inc1TeamPages,
   },
   {
     id: 2,
@@ -241,6 +346,13 @@ export const INCIDENTS: Incident[] = [
         cutAt: new Date(Date.now() - 1000 * 60 * 25).toISOString(),
       },
     ],
+    recoveryPaths: [],
+    microUpdates: [],
+    participants: [
+      { incidentId: '2', userId: 'd.kim@company.com', displayName: 'D. Kim', role: 'mim', joinedAt: new Date(Date.now() - 1000 * 60 * 210).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+      { incidentId: '2', userId: 'a.reyes@company.com', displayName: 'A. Reyes', role: 'sre', joinedAt: new Date(Date.now() - 1000 * 60 * 200).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+    ],
+    teamPages: [],
   },
   {
     id: 3,
@@ -328,11 +440,20 @@ export const INCIDENTS: Incident[] = [
         cutAt: new Date(Date.now() - 1000 * 60 * 8).toISOString(),
       },
     ],
+    recoveryPaths: [],
+    microUpdates: [],
+    participants: [
+      { incidentId: '3', userId: 'c.walsh@company.com', displayName: 'C. Walsh', role: 'mim', joinedAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+      { incidentId: '3', userId: 'b.nakamura@company.com', displayName: 'B. Nakamura', role: 'sre', joinedAt: new Date(Date.now() - 1000 * 60 * 28).toISOString(), leftAt: null, isOnScene: true, isSilent: false, rapidEscalationFlag: false },
+    ],
+    teamPages: [],
   },
 ]
 
 // Derived helpers
 export const getIncident = (id: number) => INCIDENTS.find(i => i.id === id) ?? null
+export const getTeam = (id: string) => TEAMS.find(t => t.id === id) ?? null
+export const getActiveTeams = () => TEAMS.filter(t => t.isActive)
 export const getActiveIncidents = () => INCIDENTS.filter(i => i.status !== 'Resolved')
 
 // Overall system status derived from active incidents

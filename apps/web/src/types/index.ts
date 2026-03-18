@@ -1,6 +1,11 @@
 // ─── Core enums ──────────────────────────────────────────────────────────────
 
 export type Severity = 'Critical' | 'High' | 'Medium' | 'Low'
+export type RecoveryPathStatus = 'active' | 'successful' | 'abandoned' | 'paused'
+export type HypothesisStatus = 'active' | 'validated' | 'eliminated' | 'discarded'
+export type MicroUpdateSource = 'bridge' | 'tool' | 'system'
+export type ParticipantRole = 'mim' | 'sre' | 'leader' | 'service_manager' | 'customer_ops' | 'validator' | 'responder' | 'observer'
+export type AlarmLevel = 'Box0' | 'Box1' | 'Box2' | 'Box3'
 export type IncidentStatus = 'Active' | 'Monitoring' | 'Resolved'
 export type PhaseNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8
 export type ExternalImpact = 'Yes' | 'No' | 'Unknown' | 'Likely'
@@ -27,7 +32,7 @@ export const PHASES: PhaseDefinition[] = [
   { number: 5, name: 'Isolation',  description: 'Root cause identified. Isolating the fault domain.',    icon: '🔬' },
   { number: 6, name: 'Mitigation', description: 'Active remediation underway.',                          icon: '🔧' },
   { number: 7, name: 'Validation', description: 'Recovery validated across affected systems.',            icon: '✅' },
-  { number: 8, name: 'Resolution', description: 'Incident closed. PIR to follow within 72 hours.',       icon: '🏁' },
+  { number: 8, name: 'Resolution', description: 'Incident closed. Learning Review within 72 hours.',    icon: '🏁' },
 ]
 
 // ─── Command team ─────────────────────────────────────────────────────────────
@@ -113,6 +118,10 @@ export interface Incident {
   riskLevel: RiskLevel
   execSummary: string
   audienceNotes?: string
+  recoveryPaths: RecoveryPath[]
+  microUpdates: MicroUpdate[]
+  participants: IncidentParticipant[]
+  teamPages: TeamPage[]
 }
 
 // ─── Derived / computed ───────────────────────────────────────────────────────
@@ -123,6 +132,88 @@ export interface IncidentMetrics {
   affectedUsers: number
   currentPhaseLabel: string
   updatesPosted: number
+}
+
+// ─── Recovery paths ───────────────────────────────────────────────────────────
+
+export interface Hypothesis {
+  id: string
+  incidentId: string
+  recoveryPathId: string | null
+  title: string
+  status: HypothesisStatus
+  evidence: string
+  raisedBy: string
+  raisedAt: string
+  resolvedAt: string | null
+  resolution: string | null
+}
+
+export interface RecoveryPath {
+  id: string
+  incidentId: string
+  title: string
+  status: RecoveryPathStatus
+  phase: PhaseNumber
+  phaseEnteredAt: string
+  owner: string
+  currentBet: string
+  hypotheses: Hypothesis[]
+  openedAt: string
+  closedAt: string | null
+  notes: string
+}
+
+// ─── MicroUpdates (raw CAD notes) ─────────────────────────────────────────────
+
+export interface MicroUpdate {
+  id: string
+  incidentId: string
+  recoveryPathId: string | null
+  milestoneId: string | null
+  content: string
+  author: string
+  timestamp: string
+  source: MicroUpdateSource
+}
+
+// ─── Incident participants (CAD presence model) ───────────────────────────────
+
+export interface IncidentParticipant {
+  incidentId: string
+  userId: string
+  displayName: string
+  role: ParticipantRole
+  joinedAt: string
+  leftAt: string | null
+  isOnScene: boolean
+  isSilent: boolean
+  rapidEscalationFlag: boolean
+}
+
+// ─── Teams and dispatch ───────────────────────────────────────────────────────
+
+export interface Team {
+  id: string
+  name: string
+  division: string
+  onCallRotation: string | null
+  defaultAlarmLevel: AlarmLevel
+  isActive: boolean
+}
+
+export interface TeamPage {
+  id: string
+  incidentId: string
+  teamId: string
+  teamName: string
+  contactName: string | null
+  pagedAt: string
+  acknowledgedAt: string | null
+  arrivedAt: string | null
+  pagedBy: string
+  alarmLevel: AlarmLevel | null
+  notes: string | null
 }
 
 // ─── KPI definitions and observations ────────────────────────────────────────

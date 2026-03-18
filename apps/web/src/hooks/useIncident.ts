@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { Incident, CommandTeam, StatusUpdate } from '../types'
+import type { Incident, CommandTeam, StatusUpdate, RecoveryPath, Hypothesis, MicroUpdate, TeamPage, AlarmLevel } from '../types'
 import { INCIDENTS } from '../data/mockData'
 
 type IncidentStore = Record<number, Incident>
@@ -76,6 +76,153 @@ export function useIncident(id: number) {
     })
   }, [id])
 
+  // ─── Recovery Path Operations ────────────────────────────────────────────
+
+  const addRecoveryPath = useCallback((title: string, owner: string) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const newPath: RecoveryPath = {
+        id: `path-${Date.now()}`,
+        incidentId: String(id),
+        title,
+        owner,
+        status: 'active',
+        phase: 1,
+        phaseEnteredAt: new Date().toISOString(),
+        currentBet: '',
+        hypotheses: [],
+        openedAt: new Date().toISOString(),
+        closedAt: null,
+        notes: '',
+      }
+      const updated = { ...prev, recoveryPaths: [...prev.recoveryPaths, newPath] }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  const advancePathPhase = useCallback((pathId: string) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const paths = prev.recoveryPaths.map(p =>
+        p.id === pathId && p.phase < 8 ? { ...p, phase: (p.phase + 1) as RecoveryPath['phase'] } : p
+      )
+      const updated = { ...prev, recoveryPaths: paths }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  const regressPathPhase = useCallback((pathId: string) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const paths = prev.recoveryPaths.map(p =>
+        p.id === pathId && p.phase > 1 ? { ...p, phase: (p.phase - 1) as RecoveryPath['phase'] } : p
+      )
+      const updated = { ...prev, recoveryPaths: paths }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  const updatePathBet = useCallback((pathId: string, currentBet: string) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const paths = prev.recoveryPaths.map(p =>
+        p.id === pathId ? { ...p, currentBet } : p
+      )
+      const updated = { ...prev, recoveryPaths: paths }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  const addHypothesis = useCallback((pathId: string, title: string) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const newHyp: Hypothesis = {
+        id: `hyp-${Date.now()}`,
+        incidentId: String(id),
+        recoveryPathId: pathId,
+        title,
+        status: 'active',
+        evidence: '',
+        raisedBy: 'R. Castillo',
+        raisedAt: new Date().toISOString(),
+        resolvedAt: null,
+        resolution: null,
+      }
+      const paths = prev.recoveryPaths.map(p =>
+        p.id === pathId ? { ...p, hypotheses: [...p.hypotheses, newHyp] } : p
+      )
+      const updated = { ...prev, recoveryPaths: paths }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  // ─── Micro Update Operations ─────────────────────────────────────────────
+
+  const postMicroUpdate = useCallback((content: string, pathId: string | null) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const newUpdate: MicroUpdate = {
+        id: `mu-${Date.now()}`,
+        incidentId: String(id),
+        content,
+        source: 'bridge',
+        author: 'R. Castillo',
+        timestamp: new Date().toISOString(),
+        recoveryPathId: pathId,
+        milestoneId: null,
+      }
+      const updated = { ...prev, microUpdates: [...prev.microUpdates, newUpdate] }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  // ─── Team Dispatch Operations ─────────────────────────────────────────────
+
+  const pageTeam = useCallback((
+    teamId: string,
+    teamName: string,
+    contactName: string | null,
+    alarmLevel: AlarmLevel
+  ) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const newPage: TeamPage = {
+        id: `page-${Date.now()}`,
+        incidentId: String(id),
+        teamId,
+        teamName,
+        contactName: contactName ?? null,
+        alarmLevel,
+        pagedAt: new Date().toISOString(),
+        acknowledgedAt: null,
+        arrivedAt: null,
+        pagedBy: 'R. Castillo',
+        notes: null,
+      }
+      const updated = { ...prev, teamPages: [...prev.teamPages, newPage] }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
+  const markTeamArrived = useCallback((pageId: string) => {
+    setIncident(prev => {
+      if (!prev) return prev
+      const pages = prev.teamPages.map(p =>
+        p.id === pageId ? { ...p, arrivedAt: new Date().toISOString() } : p
+      )
+      const updated = { ...prev, teamPages: pages }
+      store[id] = updated
+      return updated
+    })
+  }, [id])
+
   return {
     incident,
     updateTitle,
@@ -84,6 +231,14 @@ export function useIncident(id: number) {
     advancePhase,
     postUpdate,
     updateAlertField,
+    addRecoveryPath,
+    advancePathPhase,
+    regressPathPhase,
+    updatePathBet,
+    addHypothesis,
+    postMicroUpdate,
+    pageTeam,
+    markTeamArrived,
   }
 }
 
