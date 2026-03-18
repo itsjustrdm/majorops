@@ -1,0 +1,25 @@
+name = "mim-router"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Routes — wildcard catches all subdomains of mim.run
+# The apex domain (mim.run) is served by Cloudflare Pages directly.
+[[routes]]
+pattern = "*.mim.run/*"
+zone_name = "mim.run"
+
+[[routes]]
+pattern = "*.mim.run"
+zone_name = "mim.run"
+
+# When D1 is ready, bind it here:
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "majorops"
+# database_id = "your-d1-database-id"
+
+# When KV is ready for caching:
+# [[kv_namespaces]]
+# binding = "CACHE"
+# id = "your-kv-namespace-id"

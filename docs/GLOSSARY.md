@@ -155,8 +155,26 @@ A pre-configured, cross-functional response unit assembled for high-severity inc
 **MajorOps**
 The platform. Not a generic ITSM tool. Not a help desk. The operational layer between chaos and resolution.
 
-**Fireground View**
-The operator dashboard. What the MIM uses during an active incident. Phase tracking, command assignments, milestone composer, recovery path management. Auth required.
+**Fireground View (Classic)**
+The default MIM operator dashboard. Full situational overview — command team, phase panel, timeline, milestones, dispatch, recovery paths. Auth required. URL: `/admin/incidents/:id`.
+
+**Terminal View**
+The CAD command line fireground. 3-column fixed viewport, unified micro-update feed, command input at the bottom. The recommended view for active P1/P2 incidents. Accepts bridge notes and slash commands without leaving the keyboard. URL: `/admin/incidents/:id/terminal`.
+
+**Focus View**
+A stripped-down single-surface fireground for high-noise incidents. No sidebars. Just phase, current bet, guidance, and the essentials. URL: `/admin/incidents/:id/focus`.
+
+**CAD Bar (Global CAD Bar)**
+A persistent 32px command bar fixed to the bottom of every page in MajorOps. Context-aware: green `majorops ▸` at root, red/amber `INC-1234 ▸` in an active incident. Press `` ` `` from anywhere to focus it. Accepts all navigation and operational commands — `join`, `what`, `ls`, `new`, `view`, `pop`, `mom`, `leave`, and more.
+
+**MOM (Menu of Menus)**
+A quick-key reference panel that opens above the CAD bar. Two columns: navigation commands on the left, incident ops on the right. Activated with `mom` in the CAD bar or by typing `mom`. The IT equivalent of a CAD system's quick-key card.
+
+**Hypothesis**
+A first-class entity within a recovery path. Each hypothesis has a lifecycle: `active → validated / eliminated / discarded`. Hypotheses are never deleted — their elimination is the finding. An eliminated hypothesis from a previous incident is the first thing to check the next time the same failure mode appears.
+
+**Recovery Path**
+A named stream of investigation and remediation work within an incident. Each path has an owner, a phase, a current bet (working theory), and a set of hypotheses. Multiple paths can run simultaneously. Paths can regress — if a path was at Isolation and the wrong team was engaged, regressing to Gather is the correct action. Also referred to as a **Recovery Track** in some contexts.
 
 **Stakeholder View (10,000 ft)**
 The milestone feed visible to internal staff. What changed, what's next, when to expect the next update. No auth required.
@@ -164,8 +182,20 @@ The milestone feed visible to internal staff. What changed, what's next, when to
 **Executive View (30,000 ft)**
 Clean, current incident status at a glance. Impact, phase, severity, last update. No auth required.
 
+**`what.mim.run`**
+The natural language incident search surface. `what.mim.run/payment processing` performs a fuzzy search across all active and recently resolved incidents. A single clear match redirects automatically. Multiple matches show a picker. Identical to `mim.run/search?q=payment+processing`. Exists because humans describe incidents by what broke, not by ticket number.
+
 **Tiered Awareness**
 The design principle that different roles receive the same incident data at different altitudes of fidelity. One source of truth, multiple views.
+
+**Team Page / Dispatch**
+The structured act of paging an on-call team to a major incident. Team name is selected from a validated list (no free-text drift). Arrival is tracked with a timestamp. Response times feed the Team Dispatch Credit score on the analytics dashboard.
+
+**Team Dispatch Credit Score**
+A per-team KPI tracking response speed and reliability across all incidents. Modeled on the ISO Public Protection Classification (1–10 scale). Accumulated over rolling incidents. Surfaces in the analytics dashboard and is the data behind post-incident accountability conversations.
+
+**CAD (Computer-Aided Dispatch)**
+The technology class MajorOps draws from most directly. In public safety, a CAD system is what the dispatcher uses to receive calls, assign units, and track the status of every active incident in real time. MajorOps applies the same model — persistent command interface, structured dispatch, real-time status — to IT incident response.
 
 ---
 

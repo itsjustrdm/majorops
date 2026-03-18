@@ -45,7 +45,7 @@ export function FixedFooterBar({ incident }: FixedFooterBarProps) {
   ]
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-ops-border bg-ops-bg">
+    <div className="fixed bottom-8 left-0 right-0 z-40 flex border-t border-ops-border bg-ops-bg">
       {tiles.map((tile, i) => (
         <div
           key={i}

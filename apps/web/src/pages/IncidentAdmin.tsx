@@ -65,7 +65,7 @@ export default function IncidentAdmin() {
   const pendingPages = incident.teamPages.filter(p => !p.arrivedAt).length
 
   return (
-    <div className="min-h-screen bg-ops-bg pb-20 text-ops-text font-body">
+    <div className="min-h-screen bg-ops-bg pb-32 text-ops-text font-body">
       {/* Top bar */}
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ops-border bg-ops-bg px-6 py-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -84,7 +84,15 @@ export default function IncidentAdmin() {
             <Pencil size={11} className="shrink-0 text-ops-dim" strokeWidth={1.5} />
           </div>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
+          {/* View switcher */}
+          <div className="flex items-center border border-ops-border">
+            <span className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest bg-ops-red text-white">Classic</span>
+            <Link to={`/admin/incidents/${incident.id}/terminal`}
+              className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:bg-ops-muted transition-colors border-l border-ops-border">Terminal</Link>
+            <Link to={`/admin/incidents/${incident.id}/focus`}
+              className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:bg-ops-muted transition-colors border-l border-ops-border">Focus</Link>
+          </div>
           <SeverityBadge severity={incident.severity} />
           <StatusBadge status={incident.status} />
           <Link

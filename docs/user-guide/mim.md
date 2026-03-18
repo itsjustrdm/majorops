@@ -92,6 +92,22 @@ The `›MAJORops` wordmark in the top bar tells you the operational state at a g
 
 This is intentional. The interface changes posture when something is wrong. You should never have to wonder if you are looking at a live incident or a historical view.
 
+### Three Fireground Views
+
+The MIM fireground has three views. All three show the same incident — they differ in what they surface and how fast you can operate.
+
+| View | URL | When to use |
+|---|---|---|
+| **Classic** | `/admin/incidents/:id` | Default. Full situational overview — command team, phase panel, timeline, milestones, dispatch, recovery paths. |
+| **Terminal** | `/admin/incidents/:id/terminal` | Active operations. 3-column fixed viewport, unified micro-update feed, CAD command line at the bottom. Type to post bridge notes or run commands without lifting your hands. |
+| **Focus** | `/admin/incidents/:id/focus` | High-noise P1s. Single-surface, max-width, no sidebars. Just the current bet, phase guidance, and the essentials. |
+
+Switch between views using the view switcher in the header, or use the CAD bar: `view terminal`, `view focus`, `view classic`.
+
+The **Terminal view** is the recommended default for active P1 and P2 incidents. It is built around the assumption that you are typing constantly. The command line at the bottom accepts bridge notes (`anything you type and hit Enter`) and slash commands (`/dispatch`, `/advance`, `/hyp`). The unified feed sorts micro-updates and command results chronologically, newest first.
+
+---
+
 ### Fixed Footer Bar
 
 Always visible. Five tiles that give you the operational snapshot without scrolling:
@@ -409,11 +425,89 @@ If the After Action is not scheduled on the resolution milestone, it does not ge
 | Edit any field | Click the field |
 | Save edit | `Enter` (single-line) · Click away (multi-line) |
 | Cancel edit | `Esc` |
-| Open new incident | Navigate to `new.mim.run` |
+| Focus CAD bar | `` ` `` (backtick) from anywhere |
+| Open new incident | `new.mim.run` · CAD bar: `new` |
+| Search by description | `what.mim.run/<text>` · CAD bar: `what <text>` |
+| Find by ID | CAD bar: `join 1234` |
+| List active incidents | CAD bar: `ls` |
+| Switch to terminal view | CAD bar: `view terminal` |
+| Switch to focus view | CAD bar: `view focus` |
+| Pop out to window | CAD bar: `pop` |
+| Quick-key reference | CAD bar: `mom` |
 | Advance phase | Phase Command Panel → Advance Phase button |
-| Post quick update | Phase Command Panel → Quick Actions |
+| Post bridge note (terminal) | Type note → `Enter` in terminal input |
+| Post slash command (terminal) | `/advance`, `/dispatch <team>`, `/hyp <text>` |
+| Post quick update (classic) | Phase Command Panel → Quick Actions |
 | Generate AI draft | Phase Command Panel → AI Draft button |
 | Generate exec brief | Incident header → AI Exec Brief |
+
+---
+
+## The CAD Bar
+
+A persistent command bar sits at the bottom of every page in MajorOps. 32px. Always visible. It does not scroll away.
+
+**Focusing it:** Press the backtick key (`` ` ``) from anywhere — any page, any state — to focus the CAD bar without touching the mouse.
+
+**Prompt states:**
+
+- `majorops ▸` — green. You are at root. No active incident loaded.
+- `INC-1234 ▸` — red or amber, blinking for Critical/High. You are in an active incident.
+
+**Commands:**
+
+```
+join 1234         load incident 1234 — navigate to admin view
+what payment      search active incidents by description
+leave             exit current incident, back to status
+ls                list all active incidents inline in the log
+new               open create incident form
+analytics         stats dashboard
+status            system status page
+view terminal     switch current incident to terminal view
+view focus        switch to focus mode
+view classic      switch to default admin view
+pop               open terminal in a new 1440×900 window
+mom               menu of menus — full quick-key reference overlay
+help              print command reference
+clear             clear the log
+```
+
+**`what` — natural language search:**
+
+Type `what payment processing` or `what auth` to fuzzy-search across all active and recently resolved incidents. If there is one clear match, it redirects automatically. Multiple matches show a picker. This is also available at `what.mim.run/payment processing` — same search, from any browser tab or phone.
+
+**`mom` — menu of menus:**
+
+Toggles a reference panel above the bar with all commands grouped by context. Useful when you are new to the system or handing off mid-incident.
+
+**`pop` — dedicated window:**
+
+Opens the terminal view in a chrome-stripped 1440×900 window. Useful when running a major incident from a secondary monitor or when you want the CAD interface isolated from other browser tabs.
+
+**`ls` — live incident list:**
+
+Prints all active incidents inline in the log area, with ID, severity, phase, and title. Does not navigate away from the current page.
+
+---
+
+## Finding an Incident
+
+You do not need a ticket number to find an active incident in MajorOps.
+
+**By ID (if you have it):**
+
+- CAD bar: `join 1234`
+- Browser: `mim.run/incidents/1234` (stakeholder view) or `mim.run/admin/incidents/1234` (MIM view)
+- Shortlink: `1234.mim.run` → stakeholder view
+
+**By description (if you don't):**
+
+- CAD bar: `what payment processing`
+- Browser: `mim.run/search?q=payment+processing`
+- Shortlink: `what.mim.run/payment processing`
+
+Incident IDs are short by design. When you call someone on-call at 2am, you say "the payment processing incident" — not "INC0000334234." The search surface handles that. When there is one clear match, it redirects automatically. When there are several, it shows you a list. When there are none, it shows you everything active so you are never stranded.
 
 ---
 
@@ -428,7 +522,14 @@ The mim.run platform runs on **Cloudflare Workers + D1 + Pages**. The frontend i
 | `mim.run` | Public status page — all active incidents |
 | `new.mim.run` | Call for Service intake — opens a new incident |
 | `mim.run/incidents/:id` | Public incident detail — shareable status link |
-| `mim.run/admin/incidents/:id` | MIM fireground — authenticated operator view |
+| `mim.run/admin/incidents/:id` | MIM fireground — Classic view |
+| `mim.run/admin/incidents/:id/terminal` | MIM fireground — Terminal / CAD CLI view |
+| `mim.run/admin/incidents/:id/focus` | MIM fireground — Focus mode |
+| `mim.run/analytics` | Stats dashboard — MTTx, team scores, phase analysis |
+| `mim.run/search?q=…` | Incident search — fuzzy match across active + recent |
+| `what.mim.run/anything` | Natural language shortlink → search |
+| `1234.mim.run` | Direct shortlink — public stakeholder view |
+| `1234.mim.run/terminal` | Direct shortlink — MIM terminal view |
 | `mim.run/login` | SSO entry via Cloudflare Access |
 
 The `new.mim.run` subdomain is a redirect target or a dedicated Pages route that deep-links to the new incident form with the intake fields pre-focused. No different URL scheme for authenticated users — Cloudflare Access handles auth transparently before the user hits the React app.
