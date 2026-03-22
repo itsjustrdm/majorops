@@ -18,6 +18,7 @@ import { MilestoneList } from '../components/MilestoneList'
 import { Card, SectionLabel } from '../components/ui/Card'
 import { InlineEdit } from '../components/ui/InlineEdit'
 import { WordmarkLogo } from '../components/WordmarkLogo'
+import { ThemeSwitcher } from '../components/ThemeSwitcher'
 import { useIncident } from '../hooks/useIncident'
 import { useElapsed } from '../hooks/useClock'
 import { formatDurationWithSeconds, phaseLabel, phaseDescription } from '../lib/utils'
@@ -67,7 +68,7 @@ export default function IncidentAdmin() {
   return (
     <div className="min-h-screen bg-ops-bg pb-32 text-ops-text font-body">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ops-border bg-ops-bg px-6 py-3">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ops-border bg-ops-muted px-6 py-3">
         <div className="flex items-center gap-3 min-w-0">
           <Link to="/" className="flex items-center gap-1.5 font-mono text-xs text-ops-dim hover:text-ops-text transition-colors shrink-0">
             <ArrowLeft size={13} strokeWidth={1.5} />
@@ -92,9 +93,18 @@ export default function IncidentAdmin() {
               className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:bg-ops-muted transition-colors border-l border-ops-border">Terminal</Link>
             <Link to={`/admin/incidents/${incident.id}/focus`}
               className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:bg-ops-muted transition-colors border-l border-ops-border">Focus</Link>
+            <Link to={`/admin/incidents/${incident.id}/review`}
+              className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-amber/70 hover:text-ops-amber hover:bg-ops-muted transition-colors border-l border-ops-border">Review</Link>
+            <Link to={`/admin/incidents/${incident.id}/debrief`}
+              className={`px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest border-l border-ops-border transition-colors ${
+                incident.status === 'Resolved' || incident.phase === 8
+                  ? 'text-ops-green/80 hover:text-ops-green hover:bg-ops-muted'
+                  : 'text-ops-dim/40 cursor-not-allowed pointer-events-none'
+              }`}>Debrief</Link>
           </div>
           <SeverityBadge severity={incident.severity} />
           <StatusBadge status={incident.status} />
+          <ThemeSwitcher />
           <Link
             to="/analytics"
             className="hidden sm:flex items-center gap-1.5 border border-ops-border px-3 py-1.5 font-mono text-[10px] text-ops-dim hover:text-ops-text hover:border-ops-text/20 transition-colors"
@@ -105,21 +115,26 @@ export default function IncidentAdmin() {
         </div>
       </header>
 
-      {/* Phase bar */}
-      <div className="border-b border-ops-border">
-        <PhaseBar currentPhase={incident.phase} showNumbers severity={incident.severity} />
+      {/* Phase bar — elevated surface so it visually separates header from tabs */}
+      <div className="border-b border-ops-border bg-ops-surface py-1">
+        <PhaseBar
+          currentPhase={incident.phase}
+          showNumbers
+          severity={incident.severity}
+          timeline={incident.timeline}
+        />
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-ops-border bg-ops-surface">
+      <div className="border-b border-ops-border bg-ops-muted">
         <div className="mx-auto max-w-7xl px-6 flex items-center">
           {TABS.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2.5 font-mono text-[11px] uppercase tracking-widest border-b-2 transition-colors flex items-center gap-1.5 ${
+              className={`px-4 py-2.5 font-mono text-[11px] uppercase tracking-widest border-b-[3px] transition-colors flex items-center gap-1.5 ${
                 activeTab === tab.id
-                  ? 'border-ops-red text-ops-text'
+                  ? 'border-ops-red text-white'
                   : 'border-transparent text-ops-dim hover:text-ops-text'
               }`}
             >
@@ -141,10 +156,10 @@ export default function IncidentAdmin() {
             {/* ─── FIREGROUND TAB ─────────────────────────────── */}
             {activeTab === 'fireground' && (
               <>
-                <Card className="px-5 py-5">
+                <Card accent={hasWartime ? 'red' : 'none'} className="px-5 py-5">
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-ops-blue/30 bg-ops-blue/10">
-                      <MessageSquare size={18} strokeWidth={1.5} className="text-ops-blue" />
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${hasWartime ? 'border-ops-red/30 bg-ops-red/10' : 'border-ops-blue/30 bg-ops-blue/10'}`}>
+                      <MessageSquare size={18} strokeWidth={1.5} className={hasWartime ? 'text-ops-red' : 'text-ops-blue'} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h2 className="font-heading text-lg font-700 uppercase tracking-wide text-ops-text">
@@ -187,7 +202,7 @@ export default function IncidentAdmin() {
 
                 <BridgeBanner bridgeUrl={incident.bridgeUrl} />
 
-                <Card className="px-5 py-5">
+                <Card accent="amber" className="px-5 py-5">
                   <RecoveryPaths
                     paths={incident.recoveryPaths}
                     onAdvancePhase={advancePathPhase}
@@ -198,7 +213,7 @@ export default function IncidentAdmin() {
                   />
                 </Card>
 
-                <Card className="px-5 py-5">
+                <Card accent="blue" className="px-5 py-5">
                   <MicroUpdateFeed
                     updates={incident.microUpdates}
                     onPost={postMicroUpdate}
@@ -259,14 +274,29 @@ export default function IncidentAdmin() {
           {/* Right sidebar */}
           <div className="w-72 shrink-0">
             <div className="sticky top-24 space-y-4">
-              <div className="border border-ops-border bg-ops-surface">
+
+              {/* On Bridge — presence roster */}
+              <div className="border border-ops-border bg-ops-surface border-t-2 border-t-ops-blue">
+                <div className="flex items-center gap-2 px-4 py-2 border-b border-ops-border bg-ops-blue/5">
+                  <span className="font-heading text-[10px] font-700 uppercase tracking-widest text-ops-blue">On Bridge</span>
+                  <span className="ml-auto font-mono text-[9px] text-ops-dim">
+                    {incident.participants.filter(p => p.isOnScene).length} active
+                  </span>
+                </div>
                 <div className="px-4 py-3">
                   <PresenceRoster participants={incident.participants} />
                 </div>
               </div>
-              <div className="border border-ops-border bg-ops-surface divide-y divide-ops-border">
+
+              {/* Live Metrics */}
+              <div className="border border-ops-border bg-ops-surface border-t-2 border-t-ops-amber divide-y divide-ops-border">
+                <div className="flex items-center gap-2 px-4 py-2 bg-ops-amber/5">
+                  <span className="font-heading text-[10px] font-700 uppercase tracking-widest text-ops-amber">Live Metrics</span>
+                </div>
                 <MetricsSidebar incident={incident} />
               </div>
+
+              {/* Phase Command Panel */}
               <PhaseCommandPanel
                 incident={incident}
                 onAdvancePhase={advancePhase}

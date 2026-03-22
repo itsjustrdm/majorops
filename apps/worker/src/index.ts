@@ -2,8 +2,14 @@
  * MajorOps API Worker
  * Cloudflare Worker — D1 backend for mim.run
  *
- * Status: stub — endpoints return mock 200s until real handlers are wired
+ * Status: stub — endpoints return mock responses until real handlers are wired.
  * See: docs/api-reference/openapi.yaml for the full API contract
+ *
+ * Why this is plain fetch() for now:
+ * - the API surface is still small
+ * - keeping the first D1 wiring obvious matters more than abstractions
+ * - once incident routes, auth, validation, and middleware grow, Hono is a
+ *   good next step for structure rather than a prerequisite to begin
  */
 
 export interface Env {
@@ -14,7 +20,8 @@ export interface Env {
 }
 
 const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*', // tighten to mim.run domains in prod
+  // Wide open during bring-up. Tighten this once the app domains are fixed.
+  'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, CF-Access-JWT-Assertion',
 };
@@ -45,8 +52,8 @@ export default {
       return json({ status: 'ok', env: env.ENVIRONMENT ?? 'unknown' });
     }
 
-    // OpenAPI spec (served live — Swagger UI can import from here)
-    // TODO: import and serve the actual openapi.yaml content
+    // OpenAPI spec endpoint.
+    // TODO: serve the actual generated/parity spec rather than this stub.
     if (pathname === '/v1/openapi.json') {
       return json({ info: { title: 'MajorOps API', version: '0.1.0' } });
     }
@@ -64,14 +71,16 @@ async function handleV1(request: Request, url: URL, env: Env): Promise<Response>
   const path = url.pathname.replace('/v1', '');
   const method = request.method;
 
-  // ── Incidents ──────────────────────────────────────────────────────────────
+  // Incidents
+  // Keep route names aligned with docs/api-reference/openapi.yaml so the mock
+  // stage and the real D1-backed stage evolve on the same contract.
   if (path === '/incidents' && method === 'GET') {
-    // TODO: real D1 query
+    // TODO: replace with a real D1 query.
     return json({ incidents: [], total: 0 });
   }
 
   if (path === '/incidents' && method === 'POST') {
-    // TODO: create incident, require auth
+    // TODO: create incident and require auth.
     return json({ id: 'stub', message: 'not yet implemented' }, 501);
   }
 
@@ -81,7 +90,7 @@ async function handleV1(request: Request, url: URL, env: Env): Promise<Response>
     const sub = incidentMatch[2] ?? '';
 
     if (sub === '' && method === 'GET') {
-      // TODO: real D1 query
+      // TODO: fetch one incident plus the audience-specific computed fields.
       return json({ id: incidentId, message: 'not yet implemented' }, 501);
     }
 

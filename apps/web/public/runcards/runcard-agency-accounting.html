@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agency Run Card — Accounting & Finance | MajorOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700;800;900&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red:        #CC0000;
+      --red-dark:   #990000;
+      --green:      #00CC00;
+      --green-dim:  #008800;
+      --amber:      #CC8800;
+      --black:      #0A0A0A;
+      --charcoal:   #1A1A1A;
+      --slate:      #2A2A2A;
+      --storm:      #404040;
+      --fog:        #808080;
+      --smoke:      #CCCCCC;
+      --white:      #FFFFFF;
+      --font-d: 'Orbitron', sans-serif;
+      --font-h: 'Saira Condensed', sans-serif;
+      --font-b: 'IBM Plex Sans', sans-serif;
+      --font-m: 'IBM Plex Mono', monospace;
+    }
+    @keyframes blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; border-radius: 0; }
+    body { background: var(--black); color: var(--white); font-family: var(--font-b); font-size: 14px; line-height: 1.6; }
+    .page { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+
+    /* TOP BAR */
+    .top-bar { display:flex; align-items:center; justify-content:space-between; padding-bottom:14px; border-bottom:2px solid var(--red); margin-bottom:28px; }
+    .logo { display:inline-flex; align-items:baseline; text-decoration:none; }
+    .logo .prompt { font-family:var(--font-m); font-size:11px; font-weight:700; color:var(--red); animation:blink 1.5s infinite; margin-right:4px; }
+    .logo .major { font-family:var(--font-d); font-size:20px; font-weight:900; color:var(--red); letter-spacing:4px; text-transform:uppercase; }
+    .logo .ops   { font-family:var(--font-m); font-size:20px; font-weight:700; color:var(--white); letter-spacing:-1px; text-transform:lowercase; }
+    .top-right { display:flex; gap:8px; align-items:center; }
+
+    /* BADGES */
+    .badge { display:inline-flex; align-items:center; padding:3px 10px; font-family:var(--font-b); font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; border:1px solid; }
+    .b-tier1  { color:var(--fog); border-color:var(--storm); }
+    .b-box2   { color:var(--amber); border-color:var(--amber); background:rgba(204,136,0,0.1); }
+    .b-ver    { color:var(--fog); border-color:var(--storm); font-family:var(--font-m); }
+    .b-mim    { color:var(--red); border-color:var(--red-dark); background:rgba(204,0,0,0.1); }
+
+    /* BREADCRUMB */
+    .breadcrumb { font-family:var(--font-m); font-size:10px; color:var(--fog); letter-spacing:0.05em; margin-bottom:8px; }
+    .breadcrumb a { color:var(--fog); text-decoration:none; }
+    .breadcrumb a:hover { color:var(--smoke); }
+
+    /* HEADER */
+    .header { display:flex; align-items:flex-start; justify-content:space-between; gap:24px; margin-bottom:28px; }
+    .header-left .type-label { font-family:var(--font-m); font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:var(--fog); margin-bottom:6px; }
+    .header-left .title { font-family:var(--font-h); font-size:36px; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--white); line-height:1.1; }
+    .header-right { flex-shrink:0; text-align:right; }
+    .tier-display { font-family:var(--font-d); font-size:48px; font-weight:900; color:var(--storm); letter-spacing:2px; line-height:1; }
+    .tier-sub { font-family:var(--font-m); font-size:10px; color:var(--fog); letter-spacing:2px; margin-top:4px; }
+
+    /* IRS BLOCK */
+    .irs-block { background:var(--charcoal); border:1px solid var(--slate); border-left:4px solid var(--amber); padding:14px 20px; margin-bottom:24px; display:flex; align-items:center; gap:32px; }
+    .irs-label { font-family:var(--font-m); font-size:10px; font-weight:700; letter-spacing:3px; color:var(--fog); white-space:nowrap; }
+    .irs-value { font-family:var(--font-d); font-size:28px; font-weight:700; color:var(--amber); }
+    .irs-note  { font-size:12px; color:var(--fog); }
+    .irs-bar   { flex:1; height:6px; background:var(--slate); position:relative; }
+    .irs-fill  { height:100%; background:var(--amber); width:68%; }
+
+    /* SECTION */
+    .section { margin-bottom:20px; }
+    .sec-head { font-family:var(--font-h); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:2px; color:var(--fog); padding-bottom:6px; border-bottom:1px solid var(--slate); margin-bottom:12px; }
+
+    /* CARD */
+    .card { background:var(--charcoal); border:1px solid var(--slate); padding:20px; margin-bottom:16px; }
+    .card-amber { border-left:4px solid var(--amber); }
+    .card-red   { border-left:4px solid var(--red); }
+    .card-green { border-left:4px solid var(--green); }
+
+    /* GRID */
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+    @media(max-width:700px){ .grid-2,.grid-3{ grid-template-columns:1fr; } }
+
+    /* CONTACT TABLE */
+    .contact-table { width:100%; border-collapse:collapse; }
+    .contact-table th { font-family:var(--font-b); font-size:10px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--fog); padding:6px 10px; text-align:left; border-bottom:1px solid var(--slate); }
+    .contact-table td { padding:10px; font-size:13px; color:var(--smoke); border-bottom:1px solid rgba(42,42,42,0.5); vertical-align:top; }
+    .contact-table td:first-child { font-family:var(--font-h); font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--white); white-space:nowrap; }
+    .contact-table .method { font-family:var(--font-m); font-size:10px; color:var(--fog); }
+    .contact-table .seq { font-family:var(--font-m); font-size:10px; color:var(--red); text-transform:uppercase; letter-spacing:1px; }
+
+    /* SYSTEMS LIST */
+    .systems-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .sys-item { background:var(--slate); padding:10px 14px; }
+    .sys-name { font-family:var(--font-h); font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--white); }
+    .sys-alarm { font-family:var(--font-m); font-size:10px; letter-spacing:2px; margin-top:3px; }
+    .alarm-box3 { color:var(--red); }
+    .alarm-box2 { color:var(--amber); }
+    .alarm-box1 { color:#2266CC; }
+    .sys-t2 { font-size:11px; color:var(--fog); margin-top:4px; }
+
+    /* FREEZE */
+    .freeze-item { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--slate); }
+    .freeze-item:last-child { border-bottom:none; }
+    .freeze-icon { font-family:var(--font-m); color:var(--amber); font-size:13px; flex-shrink:0; margin-top:2px; }
+    .freeze-label { font-family:var(--font-h); font-size:14px; font-weight:700; text-transform:uppercase; color:var(--white); }
+    .freeze-desc  { font-size:12px; color:var(--fog); margin-top:2px; }
+
+    /* DISPATCH CHECKLIST */
+    .checklist { list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .checklist li { display:flex; align-items:flex-start; gap:10px; font-size:13px; color:var(--smoke); }
+    .check-box { flex-shrink:0; width:16px; height:16px; border:1px solid var(--storm); background:var(--black); margin-top:1px; }
+    .checklist li strong { color:var(--white); }
+    .checklist li .note { display:block; font-family:var(--font-m); font-size:11px; color:var(--fog); margin-top:2px; }
+
+    /* MUTUAL AID */
+    .aid-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--slate); font-size:13px; color:var(--smoke); }
+    .aid-row:last-child { border-bottom:none; }
+    .aid-arrow { font-family:var(--font-m); color:var(--red); }
+    .aid-name { font-family:var(--font-h); font-size:14px; font-weight:700; text-transform:uppercase; color:var(--white); }
+
+    /* FOOTER */
+    .footer { margin-top:40px; padding-top:14px; border-top:1px solid var(--slate); display:flex; align-items:center; justify-content:space-between; }
+    .footer-text { font-family:var(--font-m); font-size:11px; color:var(--fog); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="top-bar">
+    <a class="logo" href="runcard-browser.html">
+      <span class="prompt">&gt;</span><span class="major">MAJOR</span><span class="ops">ops</span>
+    </a>
+    <div class="top-right">
+      <span class="badge b-ver">RC-AGY-ACC-001</span>
+      <span class="badge b-ver">v1.0</span>
+      <span class="badge b-tier1">TIER 1 &nbsp;·&nbsp; AGENCY</span>
+      <span class="badge b-mim">MIM OWNED</span>
+    </div>
+  </div>
+
+  <div class="breadcrumb">
+    <a href="runcard-browser.html">Run Card Browser</a> &rsaquo; Tier 1 &rsaquo; Accounting &amp; Finance
+  </div>
+
+  <div class="header">
+    <div class="header-left">
+      <div class="type-label">Agency Run Card</div>
+      <div class="title">Accounting<br>&amp; Finance</div>
+    </div>
+    <div class="header-right">
+      <div class="tier-display">T1</div>
+      <div class="tier-sub">AGENCY CARD</div>
+    </div>
+  </div>
+
+  <!-- IRS -->
+  <div class="irs-block">
+    <div class="irs-label">Incident Readiness Score</div>
+    <div class="irs-value">68</div>
+    <div>
+      <div class="irs-bar"><div class="irs-fill"></div></div>
+      <div class="irs-note" style="margin-top:5px">Moderate readiness &nbsp;·&nbsp; Tier 2 cards exist for 3 of 4 systems &nbsp;·&nbsp; 1 open After Action task &nbsp;·&nbsp; Last updated: 14 days ago</div>
+    </div>
+  </div>
+
+  <!-- DIVISION OVERVIEW -->
+  <div class="card card-amber" style="margin-bottom:16px;">
+    <div class="sec-head">Division Overview</div>
+    <div style="font-size:13px; color:var(--smoke); line-height:1.7;">
+      The Accounting &amp; Finance division owns all revenue-side platforms: payment processing, invoicing, HR &amp; payroll systems, and expense management. Most systems are vendor-managed SaaS. The Finance Technology Manager is the primary MIM point of contact for all incidents in this division.
+    </div>
+    <div style="margin-top:12px; font-family:var(--font-m); font-size:11px; color:var(--fog);">
+      Default Alarm Level: <span style="color:var(--amber)">BOX 2 &nbsp;·&nbsp; P2</span> &nbsp;|&nbsp;
+      Escalate to BOX 3 if: payment processing affected OR payroll run in progress
+    </div>
+  </div>
+
+  <!-- CONTACT CHAIN -->
+  <div class="section">
+    <div class="sec-head">Primary Contact Chain</div>
+    <div class="card">
+      <table class="contact-table">
+        <thead>
+          <tr><th>Role</th><th>Reach</th><th>Escalation Order</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Finance Technology Manager</td>
+            <td><div>Pager / On-Call rotation</div><div class="method">Page first. Respond within 5 min.</div></td>
+            <td><span class="seq">1st</span></td>
+          </tr>
+          <tr>
+            <td>Finance Director</td>
+            <td><div>Mobile / Email</div><div class="method">If T. Manager unreachable or BOX 3 declared</div></td>
+            <td><span class="seq">2nd</span></td>
+          </tr>
+          <tr>
+            <td>VP Finance</td>
+            <td><div>Mobile only</div><div class="method">P1 / BOX 3 only. Do not page for BOX 1–2.</div></td>
+            <td><span class="seq">Exec</span></td>
+          </tr>
+          <tr>
+            <td>Vendor Support</td>
+            <td><div>See Tier 3 card for specific vendor contacts</div><div class="method">No Tier 3 card? Use Finance Tech Manager to retrieve.</div></td>
+            <td><span class="seq">Parallel</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SYSTEMS OWNED -->
+  <div class="section">
+    <div class="sec-head">Systems Owned &amp; Default Alarm Levels</div>
+    <div class="systems-grid">
+      <div class="sys-item">
+        <div class="sys-name">Payment Processing</div>
+        <div class="sys-alarm alarm-box3">BOX 3 · P1 — if fully down</div>
+        <div class="sys-t2">Tier 2 card: available &nbsp;<a href="runcard-browser.html" style="color:var(--fog);font-family:var(--font-m);font-size:10px;">VIEW</a></div>
+      </div>
+      <div class="sys-item">
+        <div class="sys-name">HR Systems</div>
+        <div class="sys-alarm alarm-box2">BOX 2 · P2 — default</div>
+        <div class="sys-t2">Tier 2 card: available &nbsp;<a href="runcard-generic-hr-systems.html" style="color:var(--fog);font-family:var(--font-m);font-size:10px;">VIEW</a></div>
+      </div>
+      <div class="sys-item">
+        <div class="sys-name">Billing &amp; Invoicing</div>
+        <div class="sys-alarm alarm-box2">BOX 2 · P2 — default</div>
+        <div class="sys-t2">Tier 2 card: available &nbsp;<a href="runcard-browser.html" style="color:var(--fog);font-family:var(--font-m);font-size:10px;">VIEW</a></div>
+      </div>
+      <div class="sys-item">
+        <div class="sys-name">Expense Management</div>
+        <div class="sys-alarm alarm-box1">BOX 1 · P3 — default</div>
+        <div class="sys-t2" style="color:var(--storm);">Tier 2 card: not yet created</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BLACKOUT WINDOWS -->
+  <div class="section">
+    <div class="sec-head">Blackout &amp; Freeze Windows</div>
+    <div class="card card-amber">
+      <div class="freeze-item">
+        <div class="freeze-icon">&#9644;</div>
+        <div>
+          <div class="freeze-label">Thursday 8:00 PM – 11:00 PM</div>
+          <div class="freeze-desc">Weekly payroll run. No changes to HR Systems or Payroll during this window. Auto-escalate to BOX 3 if HR Systems degrade during this period.</div>
+        </div>
+      </div>
+      <div class="freeze-item">
+        <div class="freeze-icon">&#9644;</div>
+        <div>
+          <div class="freeze-label">Last Business Day of Month</div>
+          <div class="freeze-desc">Month-end billing close. Billing &amp; Invoicing is freeze-sensitive. Contact Finance Technology Manager before any change approval.</div>
+        </div>
+      </div>
+      <div class="freeze-item">
+        <div class="freeze-icon">&#9644;</div>
+        <div>
+          <div class="freeze-label">January 1 – 15 (Annual)</div>
+          <div class="freeze-desc">Year-end financial close. All Accounting &amp; Finance systems are change-frozen. Executive approval required for any emergency change.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- DISPATCH CHECKLIST -->
+    <div class="card card-amber">
+      <div class="sec-head" style="margin-bottom:12px;">MIM Dispatch Checklist</div>
+      <ul class="checklist">
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Is the incident in a freeze window?</strong>
+            <span class="note">Check dates above. If yes — notify Finance Director immediately.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Which system is affected?</strong>
+            <span class="note">If unknown → default to BOX 2 and escalate to Finance Tech Manager.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Is payment processing involved?</strong>
+            <span class="note">If yes or unknown — declare BOX 3 immediately.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Is payroll run in progress?</strong>
+            <span class="note">Thu 8–11PM. If yes — declare BOX 3, notify Finance Director.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Pull Tier 2 card for the affected system</strong>
+            <span class="note">See systems list above. Tier 2 provides the generic response play.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Check for active Tier 3 specific app card</strong>
+            <span class="note">Use Run Card Browser. If team-authored card exists — dispatch from there.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- MUTUAL AID -->
+    <div class="card">
+      <div class="sec-head" style="margin-bottom:12px;">Mutual Aid Dependencies</div>
+      <div style="font-size:12px; color:var(--fog); margin-bottom:12px;">Systems other divisions rely on Accounting &amp; Finance for, and vice versa.</div>
+      <div class="aid-row">
+        <div class="aid-arrow">&#8592;</div>
+        <div>
+          <div class="aid-name">IT Infrastructure</div>
+          <div style="font-size:12px;color:var(--fog);">Accounting depends on IT Infra for database, network, and auth services.</div>
+        </div>
+      </div>
+      <div class="aid-row">
+        <div class="aid-arrow">&#8594;</div>
+        <div>
+          <div class="aid-name">HR &amp; People Ops</div>
+          <div style="font-size:12px;color:var(--fog);">HR depends on Payroll System for benefits and compensation data sync.</div>
+        </div>
+      </div>
+      <div class="aid-row">
+        <div class="aid-arrow">&#8592;</div>
+        <div>
+          <div class="aid-name">Customer Operations</div>
+          <div style="font-size:12px;color:var(--fog);">Customer billing data flows from CRM into Billing &amp; Invoicing systems.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-text">RC-AGY-ACC-001 &nbsp;·&nbsp; Accounting &amp; Finance Agency Card &nbsp;·&nbsp; v1.0</div>
+    <div class="footer-text">majorops.io &nbsp;·&nbsp; CC BY 4.0</div>
+  </div>
+
+</div>
+</body>
+</html>

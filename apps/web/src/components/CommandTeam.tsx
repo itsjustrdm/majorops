@@ -2,20 +2,25 @@ import { Users, Save } from 'lucide-react'
 import { useState } from 'react'
 import { InlineEdit } from './ui/InlineEdit'
 import { SectionLabel } from './ui/Card'
+import { RoleTag } from './RoleTag'
+import { ROLE_DEFINITIONS } from '../data/roles'
 import type { CommandTeam as CommandTeamType } from '../types'
+import type { RoleKey } from '../data/roles'
 
 interface CommandTeamProps {
-  command: CommandTeamType
-  onSave: (command: CommandTeamType) => void
+  command:   CommandTeamType
+  onSave:    (command: CommandTeamType) => void
   readOnly?: boolean
 }
 
-const ROLES: { key: keyof CommandTeamType; label: string; placeholder: string }[] = [
-  { key: 'sre',            label: 'Site Reliability Engineer', placeholder: 'Hands-on engineer' },
-  { key: 'mim',            label: 'Major Incident Manager',    placeholder: 'Incident coordinator' },
-  { key: 'leader',         label: 'Leader',                    placeholder: 'Team lead or director' },
-  { key: 'serviceManager', label: 'Service Manager',           placeholder: 'Service owner' },
-  { key: 'customerOps',    label: 'Customer Operations',       placeholder: 'Customer support liaison' },
+// Maps CommandTeam object keys → role keys in roles.ts
+// Single source of truth: docs/operational/command-roles.md → roles.ts → here
+const ROLES: { key: keyof CommandTeamType; roleKey: RoleKey }[] = [
+  { key: 'mim',            roleKey: 'mim'             },
+  { key: 'sre',            roleKey: 'sre'             },
+  { key: 'leader',         roleKey: 'leader'          },
+  { key: 'serviceManager', roleKey: 'service_manager' },
+  { key: 'customerOps',    roleKey: 'customer_ops'    },
 ]
 
 export function CommandTeam({ command, onSave, readOnly = false }: CommandTeamProps) {
@@ -55,25 +60,33 @@ export function CommandTeam({ command, onSave, readOnly = false }: CommandTeamPr
       </div>
 
       <div className="grid grid-cols-2 gap-0 divide-x divide-ops-border">
-        {ROLES.map((role, idx) => (
-          <div
-            key={role.key}
-            className={`px-5 py-4 ${idx === 4 ? 'col-span-2 border-t border-ops-border' : idx >= 2 ? 'border-t border-ops-border' : ''}`}
-          >
-            <div className="mb-2 font-mono text-[10px] uppercase tracking-widest text-ops-dim">
-              {role.label}
+        {ROLES.map(({ key, roleKey }, idx) => {
+          const def = ROLE_DEFINITIONS[roleKey]
+          return (
+            <div
+              key={key}
+              className={`px-5 py-4 ${idx === 4 ? 'col-span-2 border-t border-ops-border' : idx >= 2 ? 'border-t border-ops-border' : ''}`}
+            >
+              {/* Role label — hoverable, shows tooltip from roles.ts/command-roles.md */}
+              <div className="mb-2">
+                <RoleTag role={roleKey} size="sm" />
+              </div>
+
+              {/* Person's name — editable */}
+              {readOnly ? (
+                <div className="font-body text-sm text-ops-text">
+                  {command[key] || <span className="text-ops-dim italic">unassigned</span>}
+                </div>
+              ) : (
+                <InlineEdit
+                  value={draft[key]}
+                  onSave={val => update(key, val)}
+                  placeholder={def?.fullName ?? 'assign…'}
+                />
+              )}
             </div>
-            {readOnly ? (
-              <div className="font-body text-sm text-ops-text">{command[role.key] || '—'}</div>
-            ) : (
-              <InlineEdit
-                value={draft[role.key]}
-                onSave={val => update(role.key, val)}
-                placeholder={role.placeholder}
-              />
-            )}
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

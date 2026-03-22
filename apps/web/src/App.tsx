@@ -6,6 +6,11 @@ import NewIncident from './pages/NewIncident'
 import Analytics from './pages/Analytics'
 import MIMViewTerminal from './pages/MIMViewTerminal'
 import MIMViewFocus from './pages/MIMViewFocus'
+import PeerReviewPage from './pages/PeerReviewPage'
+import IncidentDebrief from './pages/IncidentDebrief'
+import About from './pages/About'
+import DocsPage from './pages/DocsPage'
+import ApiReference from './pages/ApiReference'
 import Login from './pages/Login'
 import Stakeholder from './pages/Stakeholder'
 import Executive from './pages/Executive'
@@ -26,11 +31,17 @@ export default function App() {
           <Route path="/admin/incidents/:id" element={<IncidentAdmin />} />
           <Route path="/admin/incidents/:id/terminal" element={<MIMViewTerminal />} />
           <Route path="/admin/incidents/:id/focus" element={<MIMViewFocus />} />
+          <Route path="/admin/incidents/:id/review" element={<PeerReviewPage />} />
+          <Route path="/admin/incidents/:id/debrief" element={<IncidentDebrief />} />
           {/* Other routes */}
+          {/* Docs — rendered natively inside the app from /docs markdown */}
+          <Route path="/docs/*" element={<DocsPage />} />
+          <Route path="/api-reference" element={<ApiReference />} />
           <Route path="/search" element={<SearchIncidents />} />
           <Route path="/new" element={<NewIncident />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/about" element={<About />} />
           <Route path="*" element={<StatusPage />} />
         </Routes>
       </div>

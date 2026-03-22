@@ -12,6 +12,10 @@
  * They say "the payment processing thing." So what.mim.run handles that too.
  *
  * Links are assumed live. A resolved incident still renders. The record outlasts the incident.
+ *
+ * This Worker is intentionally simple. Its job is vocabulary and routing, not
+ * business logic. If data lookups appear here later, keep them small or move
+ * them into the API Worker so this file stays legible.
  */
 
 // ─── Config ───────────────────────────────────────────────────────────────────
@@ -45,7 +49,8 @@ interface Env {
   // Bind KV for caching:       CACHE: KVNamespace
 }
 
-// ─── Handler ──────────────────────────────────────────────────────────────────
+// Handler
+// Translate short, memorable subdomains into the canonical app/API URLs.
 
 export default {
   async fetch(request: Request, _env: Env): Promise<Response> {

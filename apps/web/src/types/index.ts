@@ -16,24 +16,17 @@ export type KpiVisibility = 'internal' | 'exec'
 export type KpiSource = 'worker' | 'ui' | 'import' | 'cli'
 
 // ─── Phase metadata ───────────────────────────────────────────────────────────
+// Note: PhaseDefinition is now owned by src/lib/content.ts.
+// PHASES constant is sourced from docs/user-guide/mim.md via the Vite plugin.
+// Import { PHASES } from '../lib/content' — not from here.
 
 export interface PhaseDefinition {
   number: PhaseNumber
   name: string
   description: string
-  icon: string
+  detail?: string
+  icon?: string
 }
-
-export const PHASES: PhaseDefinition[] = [
-  { number: 1, name: 'Alert',      description: 'Incident detected. Initial triage underway.',           icon: '📡' },
-  { number: 2, name: 'Gather',     description: 'Assembling team. Collecting diagnostic data.',           icon: '🔍' },
-  { number: 3, name: 'Assess',     description: 'Scope and impact being determined.',                     icon: '📊' },
-  { number: 4, name: 'Initial',    description: 'Initial communication and stakeholder updates.',         icon: '📢' },
-  { number: 5, name: 'Isolation',  description: 'Root cause identified. Isolating the fault domain.',    icon: '🔬' },
-  { number: 6, name: 'Mitigation', description: 'Active remediation underway.',                          icon: '🔧' },
-  { number: 7, name: 'Validation', description: 'Recovery validated across affected systems.',            icon: '✅' },
-  { number: 8, name: 'Resolution', description: 'Incident closed. Learning Review within 72 hours.',    icon: '🏁' },
-]
 
 // ─── Command team ─────────────────────────────────────────────────────────────
 

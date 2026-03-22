@@ -166,7 +166,7 @@ function LogArea({ entries }: { entries: LogEntry[] }) {
 // ─── Suggestion Dropdown ──────────────────────────────────────────────────────
 
 const ALL_COMMANDS = [
-  'join', 'ls', 'new', 'analytics', 'status', 'what', 'help', 'clear', 'mom',
+  'join', 'ls', 'new', 'analytics', 'status', 'what', 'docs', 'help', 'clear', 'mom',
   'view terminal', 'view focus', 'view classic',
   'pop', 'leave',
 ]
@@ -340,6 +340,13 @@ export default function GlobalCADBar() {
       return
     }
 
+    // ── docs
+    if (verb === 'docs' || verb === 'help docs') {
+      emit('system', 'opening docs')
+      navigate('/docs')
+      return
+    }
+
     // ── what <query> — incident search
     if (verb === 'what' || verb === 'find' || verb === 'search') {
       const q = args.trim()
@@ -412,7 +419,7 @@ export default function GlobalCADBar() {
 
     // ── help
     if (verb === 'help') {
-      emit('info', 'commands: join <id> · what <text> · ls · new · analytics · status')
+      emit('info', 'commands: join <id> · what <text> · ls · new · analytics · docs · status')
       emit('info', 'incident: view [terminal|focus|classic] · pop · leave')
       emit('info', 'meta: mom · clear · help')
       emit('info', 'tip: press ` to focus · what.mim.run/<anything> also works')

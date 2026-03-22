@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MajorOps · Run Card Browser</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Saira+Condensed:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black:     #0A0A0A;
+      --steel:     #111111;
+      --steel-mid: #1C1C1C;
+      --wire:      #2A2A2A;
+      --ash:       #555555;
+      --muted:     #888888;
+      --light:     #CCCCCC;
+      --white:     #F2F2F2;
+      --red:       #CC0000;
+      --red-dark:  #8A0000;
+      --green:     #00AA44;
+      --amber:     #CC8800;
+      --blue:      #2266CC;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+    body {
+      background: var(--black);
+      color: var(--light);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+    }
+    /* TOP BAR */
+    .topbar {
+      background: var(--steel);
+      border-bottom: 2px solid var(--red);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 15px;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+    }
+    .logo-mark { color: var(--red); animation: blink 1.5s step-end infinite; }
+    .logo-major { color: var(--red); }
+    .logo-ops   { color: var(--white); }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .topbar-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      letter-spacing: 0.25em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .topbar-right { display: flex; gap: 10px; align-items: center; }
+    .pill {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      padding: 3px 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .pill-peace { border: 1px solid var(--green); color: var(--green); }
+    .pill-dark  { background: var(--wire); border: 1px solid var(--ash); color: var(--muted); }
+    /* TODO BANNER */
+    .todo-banner {
+      background: rgba(204,136,0,0.07);
+      border-bottom: 1px solid rgba(204,136,0,0.2);
+      padding: 5px 20px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--amber);
+      letter-spacing: 0.04em;
+    }
+    /* SEARCH */
+    .searchbar {
+      background: var(--steel);
+      border-bottom: 1px solid var(--wire);
+      padding: 8px 20px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .search-icon { color: var(--ash); font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+    .search-input {
+      flex: 1;
+      background: var(--black);
+      border: 1px solid var(--wire);
+      color: var(--white);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px;
+      padding: 6px 10px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--red); }
+    .search-input::placeholder { color: var(--ash); }
+    /* BROWSER GRID */
+    .browser {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .col {
+      border-right: 1px solid var(--wire);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+    .col:last-child { border-right: none; }
+    .col-head {
+      background: var(--steel-mid);
+      border-bottom: 1px solid var(--wire);
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .col-label {
+      font-family: 'Orbitron', monospace;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+    .col-label em { color: var(--red); font-style: normal; }
+    .col-count {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--ash);
+    }
+    .card-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 6px;
+      min-height: 0;
+    }
+    .card-list::-webkit-scrollbar { width: 3px; }
+    .card-list::-webkit-scrollbar-track { background: var(--black); }
+    .card-list::-webkit-scrollbar-thumb { background: var(--wire); }
+    /* CARDS */
+    .rc-card {
+      background: var(--steel-mid);
+      border: 1px solid var(--wire);
+      padding: 10px 12px;
+      margin-bottom: 5px;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.1s;
+    }
+    .rc-card:hover { border-color: var(--ash); }
+    .rc-card.selected { border-color: var(--red); background: rgba(204,0,0,0.06); }
+    .rc-card.selected::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--red);
+    }
+    .rc-card.dimmed { opacity: 0.25; pointer-events: none; }
+    .card-name {
+      font-family: 'Saira Condensed', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 5px;
+    }
+    .card-badges { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 6px; }
+    .badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      padding: 2px 5px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .b-red   { background: var(--red-dark); color: var(--white); }
+    .b-amber { background: var(--amber); color: #000; }
+    .b-blue  { background: var(--blue); color: var(--white); }
+    .b-dim   { background: transparent; border: 1px solid var(--ash); color: var(--muted); }
+    .b-green { border: 1px solid var(--green); color: var(--green); }
+    .card-desc {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-bottom: 7px;
+    }
+    .card-systems {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--ash);
+      margin-bottom: 6px;
+    }
+    .card-systems span { color: var(--muted); margin-right: 4px; }
+    .freeze-note {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--amber);
+      margin-bottom: 6px;
+    }
+    .card-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 2px;
+    }
+    .irs {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .irs-label { color: var(--ash); }
+    .irs-high  { color: var(--green); }
+    .irs-mid   { color: var(--amber); }
+    .irs-low   { color: var(--red); }
+    .irs-na    { color: var(--ash); }
+    .dispatch {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      padding: 3px 9px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .dispatch-active { background: var(--red); color: var(--white); border: none; }
+    .dispatch-active:hover { background: #AA0000; }
+    .dispatch-pending { background: transparent; border: 1px solid var(--wire); color: var(--ash); cursor: default; }
+    /* EMPTY / PROMPT */
+    .prompt-state {
+      padding: 20px 14px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--ash);
+      border-bottom: 1px solid var(--wire);
+    }
+    .empty-state {
+      padding: 30px 14px;
+      text-align: center;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--ash);
+    }
+    .empty-state .em { color: var(--wire); font-size: 18px; margin-bottom: 8px; }
+    /* BREADCRUMB on Tier 3 */
+    .breadcrumb {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      color: var(--ash);
+      margin-bottom: 4px;
+      letter-spacing: 0.04em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="logo" href="#">
+    <span class="logo-mark">&gt;</span><span class="logo-major">MAJOR</span><span class="logo-ops">ops</span>
+  </a>
+  <div class="topbar-title">Run Card Browser</div>
+  <div class="topbar-right">
+    <span class="pill pill-dark">IRS BETA</span>
+    <span class="pill pill-peace">&#9679; PEACETIME</span>
+  </div>
+</div>
+
+<div class="todo-banner">
+  &#9651; INCIDENT READINESS SCORE (IRS) — concept preview &nbsp;·&nbsp; scores shown are illustrative &nbsp;·&nbsp; feature planned Phase 5+
+</div>
+
+<div class="searchbar">
+  <span class="search-icon">&#128269;</span>
+  <input type="text" class="search-input" id="q" placeholder="Search cards by division, system, or keyword..." oninput="render()">
+</div>
+
+<div class="browser">
+
+  <div class="col">
+    <div class="col-head">
+      <div class="col-label"><em>TIER 1</em> &nbsp;·&nbsp; AGENCY</div>
+      <div class="col-count" id="cnt1"></div>
+    </div>
+    <div class="card-list" id="list1"></div>
+  </div>
+
+  <div class="col">
+    <div class="col-head">
+      <div class="col-label"><em>TIER 2</em> &nbsp;·&nbsp; GENERIC APP</div>
+      <div class="col-count" id="cnt2"></div>
+    </div>
+    <div class="card-list" id="list2">
+      <div class="prompt-state">&#8592; Select an agency</div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="col-head">
+      <div class="col-label"><em>TIER 3</em> &nbsp;·&nbsp; SPECIFIC APP</div>
+      <div class="col-count" id="cnt3"></div>
+    </div>
+    <div class="card-list" id="list3">
+      <div class="prompt-state">&#8592; Select a generic app</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const agencies = [
+  {
+    id: 'accounting', name: 'Accounting & Finance',
+    alarm: 'BOX 2', alarmCls: 'b-amber',
+    contact: 'Finance Technology Manager',
+    systems: ['Payment Processing','HR Systems','Billing & Invoicing','Expense Management'],
+    freeze: ['Thu 8–11PM · Payroll run', 'Month-end · Billing close'],
+    irs: 68,
+    card: 'runcard-agency-accounting.html'
+  },
+  {
+    id: 'it-infra', name: 'IT Infrastructure',
+    alarm: 'BOX 3', alarmCls: 'b-red',
+    contact: 'Infrastructure Manager / On-Call SRE',
+    systems: ['Database Services','Auth & Identity','Network & Connectivity','Storage & Backup'],
+    freeze: ['Sun 2–6AM · Patch window'],
+    irs: 84,
+    card: null
+  },
+  {
+    id: 'engineering', name: 'Engineering',
+    alarm: 'BOX 2', alarmCls: 'b-amber',
+    contact: 'Engineering Manager',
+    systems: ['Core API','CI/CD Pipeline','Deployment Services','Feature Flags'],
+    freeze: ['Fri 4PM – Mon 9AM · Deploy freeze'],
+    irs: 55,
+    card: null
+  },
+  {
+    id: 'customer-ops', name: 'Customer Operations',
+    alarm: 'BOX 1', alarmCls: 'b-blue',
+    contact: 'CX Technology Lead',
+    systems: ['CRM','Support Platform','Comm Tools','Reporting'],
+    freeze: [],
+    irs: null,
+    card: null
+  }
+];
+
+const tier2 = [
+  { id:'payment',   agency:'accounting',   name:'Payment Processing',      alarm:'BOX 3', cls:'b-red',   impact:'Revenue-blocking. External-facing. Regulatory exposure.',   irs:71,  card:null },
+  { id:'hr-sys',    agency:'accounting',   name:'HR Systems',              alarm:'BOX 2', cls:'b-amber', impact:'Payroll, benefits, time tracking, employee data.',           irs:65,  card:'runcard-generic-hr-systems.html' },
+  { id:'billing',   agency:'accounting',   name:'Billing & Invoicing',     alarm:'BOX 2', cls:'b-amber', impact:'Revenue cycle and accounts receivable.',                     irs:60,  card:null },
+  { id:'expense',   agency:'accounting',   name:'Expense Management',      alarm:'BOX 1', cls:'b-blue',  impact:'Employee reimbursement. Low urgency unless month-end.',      irs:null,card:null },
+  { id:'db-svc',    agency:'it-infra',     name:'Database Services',       alarm:'BOX 3', cls:'b-red',   impact:'Foundational. All application data at risk.',                irs:88,  card:null },
+  { id:'auth',      agency:'it-infra',     name:'Auth & Identity',         alarm:'BOX 3', cls:'b-red',   impact:'All login-gated systems. Complete access loss.',             irs:82,  card:null },
+  { id:'network',   agency:'it-infra',     name:'Network & Connectivity',  alarm:'BOX 3', cls:'b-red',   impact:'All systems. Operational blackout.',                         irs:79,  card:null },
+  { id:'storage',   agency:'it-infra',     name:'Storage & Backup',        alarm:'BOX 2', cls:'b-amber', impact:'Data durability and recovery capability.',                   irs:null,card:null },
+  { id:'core-api',  agency:'engineering',  name:'Core API',                alarm:'BOX 3', cls:'b-red',   impact:'All platform consumers. External integrations.',             irs:58,  card:null },
+  { id:'cicd',      agency:'engineering',  name:'CI/CD Pipeline',          alarm:'BOX 1', cls:'b-blue',  impact:'Deployment capability only. No immediate prod risk.',        irs:50,  card:null },
+  { id:'deploys',   agency:'engineering',  name:'Deployment Services',     alarm:'BOX 1', cls:'b-blue',  impact:'Release capability. No prod risk during freeze.',            irs:null,card:null },
+  { id:'crm',       agency:'customer-ops', name:'CRM',                     alarm:'BOX 2', cls:'b-amber', impact:'Sales pipeline and customer data visibility.',               irs:null,card:null },
+  { id:'support',   agency:'customer-ops', name:'Support Platform',        alarm:'BOX 2', cls:'b-amber', impact:'Customer support throughput. SLA risk.',                     irs:null,card:null },
+];
+
+const tier3 = [
+  { id:'prod-db',  t2:'db-svc',  name:'Production Database',  alarm:'BOX 3 · P1', cls:'b-red',   desc:'Primary production RDBMS. All transactional data.', card:'runcard-db-unreachable.html' },
+  { id:'payroll',  t2:'hr-sys',  name:'Payroll System',        alarm:'BOX 2 · P2', cls:'b-amber', desc:'Employee payroll. Freeze-sensitive Thu nights.',     card:null },
+  { id:'workday',  t2:'hr-sys',  name:'Workday HCM',           alarm:'BOX 2 · P2', cls:'b-amber', desc:'HR management platform. Benefits and time off.',     card:null },
+];
+
+let selAgency = null, selT2 = null;
+
+function irsClass(v) { return v===null?'irs-na':v>=80?'irs-high':v>=60?'irs-mid':'irs-low'; }
+function irsText(v)  { return v===null?'— PENDING':v+' / 100'; }
+
+function dispatchBtn(card, label='OPEN ↗') {
+  if (card) return `<a class="dispatch dispatch-active" href="${card}" target="_blank">${label}</a>`;
+  return `<span class="dispatch dispatch-pending">PENDING</span>`;
+}
+
+function renderT1() {
+  const q = document.getElementById('q').value.toLowerCase();
+  const list = document.getElementById('list1');
+  const data = agencies.filter(a => !q || a.name.toLowerCase().includes(q) || a.systems.some(s=>s.toLowerCase().includes(q)));
+  document.getElementById('cnt1').textContent = data.length + (data.length===1?' agency':' agencies');
+  if (!data.length) { list.innerHTML='<div class="empty-state"><div class="em">&#9633;</div>NO MATCH</div>'; return; }
+  list.innerHTML = data.map(a => `
+    <div class="rc-card ${selAgency?.id===a.id?'selected':''}" onclick="pickAgency('${a.id}')">
+      <div class="card-name">${a.name}</div>
+      <div class="card-badges">
+        <span class="badge ${a.alarmCls}">${a.alarm}</span>
+        <span class="badge b-dim">TIER 1</span>
+      </div>
+      <div class="card-systems"><span>OWNS:</span>${a.systems.join(' &middot; ')}</div>
+      ${a.freeze.length?`<div class="freeze-note">&#9644; ${a.freeze[0]}</div>`:''}
+      <div class="card-foot">
+        <div class="irs"><span class="irs-label">IRS</span><span class="${irsClass(a.irs)}">${irsText(a.irs)}</span></div>
+        ${dispatchBtn(a.card, 'VIEW ↗')}
+      </div>
+    </div>`).join('');
+}
+
+function renderT2(agencyId) {
+  const q = document.getElementById('q').value.toLowerCase();
+  const list = document.getElementById('list2');
+  if (!agencyId) { list.innerHTML='<div class="prompt-state">&#8592; Select an agency</div>'; document.getElementById('cnt2').textContent=''; return; }
+  let data = tier2.filter(g=>g.agency===agencyId);
+  if (q) data = data.filter(g=>g.name.toLowerCase().includes(q)||g.impact.toLowerCase().includes(q));
+  document.getElementById('cnt2').textContent = data.length + ' app'+(data.length===1?'':'s');
+  if (!data.length) { list.innerHTML='<div class="empty-state"><div class="em">&#9633;</div>NO CARDS YET<div style="margin-top:6px">MIM-authored</div></div>'; return; }
+  list.innerHTML = data.map(g=>`
+    <div class="rc-card ${selT2?.id===g.id?'selected':''}" onclick="pickT2('${g.id}')">
+      <div class="card-name">${g.name}</div>
+      <div class="card-badges">
+        <span class="badge ${g.cls}">${g.alarm}</span>
+        <span class="badge b-dim">TIER 2</span>
+      </div>
+      <div class="card-desc">${g.impact}</div>
+      <div class="card-foot">
+        <div class="irs"><span class="irs-label">IRS</span><span class="${irsClass(g.irs)}">${irsText(g.irs)}</span></div>
+        ${dispatchBtn(g.card)}
+      </div>
+    </div>`).join('');
+}
+
+function renderT3(t2Id) {
+  const q = document.getElementById('q').value.toLowerCase();
+  const list = document.getElementById('list3');
+  if (!t2Id) { list.innerHTML='<div class="prompt-state">&#8592; Select a generic app</div>'; document.getElementById('cnt3').textContent=''; return; }
+  let data = tier3.filter(s=>s.t2===t2Id);
+  if (q) data = data.filter(s=>s.name.toLowerCase().includes(q)||s.desc.toLowerCase().includes(q));
+  document.getElementById('cnt3').textContent = data.length + ' app'+(data.length===1?'':'s');
+  const parent = tier2.find(g=>g.id===t2Id);
+  const agency = agencies.find(a=>a.id===parent?.agency);
+  if (!data.length) {
+    list.innerHTML=`<div class="empty-state"><div class="em">&#9633;</div>NO SPECIFIC CARDS<div style="margin-top:6px;color:#333">Self-service &middot; team-owned</div><div style="margin-top:10px"><span class="dispatch dispatch-pending">+ CREATE CARD</span></div></div>`;
+    return;
+  }
+  list.innerHTML = data.map(s=>`
+    <div class="rc-card">
+      <div class="breadcrumb">${agency?.name||''} &rsaquo; ${parent?.name||''} &rsaquo;</div>
+      <div class="card-name">${s.name}</div>
+      <div class="card-badges">
+        <span class="badge ${s.cls}">${s.alarm}</span>
+        <span class="badge b-dim">TIER 3</span>
+        <span class="badge b-green">TEAM OWNED</span>
+      </div>
+      <div class="card-desc">${s.desc}</div>
+      <div class="card-foot">
+        <div class="irs"><span class="irs-label">IRS</span><span class="irs-na">— TEAM</span></div>
+        ${dispatchBtn(s.card,'DISPATCH ↗')}
+      </div>
+    </div>`).join('');
+}
+
+function pickAgency(id) {
+  selAgency = agencies.find(a=>a.id===id);
+  selT2 = null;
+  render();
+}
+function pickT2(id) {
+  selT2 = tier2.find(g=>g.id===id);
+  render();
+}
+function render() {
+  renderT1();
+  renderT2(selAgency?.id||null);
+  renderT3(selT2?.id||null);
+}
+render();
+</script>
+</body>
+</html>

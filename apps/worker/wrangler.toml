@@ -2,20 +2,27 @@ name = "majorops-api"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
 
-# ── D1 Database ───────────────────────────────────────────────────────────────
-# ONE database for production.
-# When you run `wrangler dev` locally, Wrangler creates a local SQLite file
-# automatically — it never touches this production DB.
-# Local DB lives at: .wrangler/state/v3/d1/ (gitignored)
+# This Worker is the API boundary for the app. Keep it boring:
+# - React/Vite serves the UI
+# - this Worker serves JSON and talks to D1
+# - later, this is the likely place to introduce Hono when the route surface
+#   grows beyond a handful of endpoints and middleware becomes worthwhile
+
+# D1 Database
+# One production database binding for the API.
+# Local `wrangler dev` uses a local SQLite-backed D1 state file automatically,
+# so local development does not touch production data.
 #
-# After running: wrangler d1 create majorops-production
-# paste the database_id below.
+# After running:
+#   wrangler d1 create majorops-production
+# copy the returned database_id into the field below.
 [[d1_databases]]
 binding = "DB"
 database_name = "majorops-production"
 database_id = "REPLACE_WITH_YOUR_DB_ID"
 
-# ── Routes (production only) ──────────────────────────────────────────────────
+# Production route for the API subdomain.
+# Cloudflare sends requests matching api.mim.run/* to this Worker.
 [[routes]]
 pattern = "api.mim.run/*"
 zone_name = "mim.run"

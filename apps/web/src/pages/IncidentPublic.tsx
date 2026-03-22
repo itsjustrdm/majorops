@@ -14,6 +14,7 @@ import { useIncident } from '../hooks/useIncident'
 import { useElapsed } from '../hooks/useClock'
 import { formatDurationWithSeconds, phaseLabel, phaseDescription } from '../lib/utils'
 import { Activity, MessageSquare } from 'lucide-react'
+import { ThemeSwitcher } from '../components/ThemeSwitcher'
 
 export default function IncidentPublic() {
   const { id } = useParams<{ id: string }>()
@@ -28,7 +29,7 @@ export default function IncidentPublic() {
   return (
     <div className="min-h-screen bg-ops-bg pb-20 text-ops-text font-body">
       {/* Top bar */}
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ops-border bg-ops-bg px-6 py-3">
+      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-ops-border bg-ops-muted px-6 py-3">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-1.5 font-mono text-xs text-ops-dim hover:text-ops-text transition-colors">
             <ArrowLeft size={13} strokeWidth={1.5} />
@@ -40,12 +41,13 @@ export default function IncidentPublic() {
         <div className="flex items-center gap-2">
           <SeverityBadge severity={incident.severity} />
           <StatusBadge status={incident.status} />
+          <ThemeSwitcher />
         </div>
       </header>
 
       {/* Phase bar */}
-      <div className="border-b border-ops-border px-0">
-        <PhaseBar currentPhase={incident.phase} showNumbers={false} severity={incident.severity} />
+      <div className="border-b border-ops-border bg-ops-surface py-1">
+        <PhaseBar currentPhase={incident.phase} severity={incident.severity} timeline={incident.timeline} />
       </div>
 
       {/* Main layout */}
@@ -54,10 +56,10 @@ export default function IncidentPublic() {
           {/* Left: main content */}
           <div className="flex-1 min-w-0 space-y-4">
             {/* Phase hero card */}
-            <Card className="px-5 py-5">
+            <Card accent={incident.severity === 'Critical' || incident.severity === 'High' ? 'red' : 'none'} className="px-5 py-5">
               <div className="flex items-start gap-4 mb-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-ops-blue/30 bg-ops-blue/10">
-                  <MessageSquare size={18} strokeWidth={1.5} className="text-ops-blue" />
+                <div className={`flex h-10 w-10 shrink-0 items-center justify-center border ${incident.severity === 'Critical' || incident.severity === 'High' ? 'border-ops-red/30 bg-ops-red/10' : 'border-ops-blue/30 bg-ops-blue/10'}`}>
+                  <MessageSquare size={18} strokeWidth={1.5} className={incident.severity === 'Critical' || incident.severity === 'High' ? 'text-ops-red' : 'text-ops-blue'} />
                 </div>
                 <div>
                   <h2 className="font-heading text-lg font-700 uppercase tracking-wide text-ops-text">
@@ -153,7 +155,10 @@ export default function IncidentPublic() {
 
           {/* Right sidebar */}
           <div className="w-64 shrink-0">
-            <div className="sticky top-24 border border-ops-border bg-ops-surface divide-y divide-ops-border">
+            <div className="sticky top-24 border border-ops-border bg-ops-surface border-t-2 border-t-ops-amber divide-y divide-ops-border">
+              <div className="flex items-center gap-2 px-4 py-2 bg-ops-amber/5">
+                <span className="font-heading text-[10px] font-700 uppercase tracking-widest text-ops-amber">Live Status</span>
+              </div>
               <MetricsSidebar incident={incident} />
             </div>
           </div>

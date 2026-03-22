@@ -1,5 +1,5 @@
 import type { Severity, IncidentStatus, PhaseNumber } from '../types'
-import { PHASES } from '../types'
+import { PHASES } from './content'
 
 // ─── Duration formatting ──────────────────────────────────────────────────────
 

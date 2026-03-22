@@ -11,10 +11,21 @@ interface IncidentCardProps {
   adminMode?: boolean
 }
 
+// Severity → left-border accent + top color strip
+function severityAccent(s: string) {
+  switch (s) {
+    case 'Critical': return { border: 'border-l-4 border-l-ops-red',    strip: 'bg-ops-red/10 border-b border-ops-red/20',    dot: 'bg-ops-red' }
+    case 'High':     return { border: 'border-l-4 border-l-ops-orange', strip: 'bg-ops-orange/10 border-b border-ops-orange/20', dot: 'bg-ops-orange' }
+    case 'Medium':   return { border: 'border-l-4 border-l-ops-amber',  strip: 'bg-ops-amber/5 border-b border-ops-amber/15',   dot: 'bg-ops-amber' }
+    default:         return { border: 'border-l-4 border-l-ops-green',  strip: 'bg-ops-green/5 border-b border-ops-green/15',   dot: 'bg-ops-green' }
+  }
+}
+
 export function IncidentCard({ incident, adminMode = false }: IncidentCardProps) {
   const navigate = useNavigate()
   const totalElapsed = useElapsed(incident.detectedAt)
   const isLongRunning = totalElapsed > 2 * 60 * 60 * 1000 // >2h
+  const accent = severityAccent(incident.severity)
 
   const handleClick = () => {
     navigate(adminMode ? `/admin/incidents/${incident.id}` : `/incidents/${incident.id}`)
@@ -27,16 +38,17 @@ export function IncidentCard({ incident, adminMode = false }: IncidentCardProps)
 
   return (
     <div
-      className="border border-ops-border bg-ops-surface cursor-pointer transition-colors hover:border-ops-red/40 group"
+      className={`border border-ops-border bg-ops-surface cursor-pointer transition-colors hover:border-ops-red/40 group ${accent.border}`}
       onClick={handleClick}
     >
-      {/* Header */}
-      <div className="px-5 pt-4 pb-3">
+      {/* Severity color strip + header */}
+      <div className={`px-5 pt-3 pb-3 ${accent.strip}`}>
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2">
+            <span className={`inline-block h-2 w-2 shrink-0 ${accent.dot}`} />
             <SeverityBadge severity={incident.severity} />
             {isLongRunning && <CriticalDurationBadge />}
-            <span className="border border-ops-border bg-ops-muted px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ops-dim">
+            <span className="border border-ops-border bg-ops-muted/50 px-2 py-0.5 font-mono text-[10px] uppercase tracking-widest text-ops-dim">
               Incident #{incident.id}
             </span>
           </div>
@@ -73,7 +85,7 @@ export function IncidentCard({ incident, adminMode = false }: IncidentCardProps)
               return (
                 <div
                   key={n}
-                  className={`h-1 flex-1 ${
+                  className={`h-1.5 flex-1 ${
                     state === 'done'   ? 'bg-ops-green' :
                     state === 'active' ? 'bg-ops-red' :
                     'bg-ops-border'
@@ -127,23 +139,23 @@ export function IncidentCard({ incident, adminMode = false }: IncidentCardProps)
       </div>
 
       {/* Footer */}
-      <div className="flex flex-col gap-2 border-t border-ops-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 border-t border-ops-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between bg-ops-muted/40">
         <div className="flex flex-wrap gap-2">
           <button
             onClick={go(`/incidents/${incident.id}`)}
-            className="border border-ops-border bg-ops-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ops-dim hover:text-ops-text"
+            className="border border-ops-border bg-ops-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:border-ops-red/30 transition-colors"
           >
             Public
           </button>
           <button
             onClick={go(`/stakeholders/${incident.id}`)}
-            className="border border-ops-border bg-ops-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ops-dim hover:text-ops-text"
+            className="border border-ops-border bg-ops-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:border-ops-red/30 transition-colors"
           >
             Stakeholder
           </button>
           <button
             onClick={go(`/executives/${incident.id}`)}
-            className="border border-ops-border bg-ops-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ops-dim hover:text-ops-text"
+            className="border border-ops-border bg-ops-muted px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:border-ops-red/30 transition-colors"
           >
             Executive
           </button>

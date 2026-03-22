@@ -1,5 +1,10 @@
 ---
-draft: true
+draft: false
+tier:
+  - docs     # Full glossary on about.majorops.io
+  - tooltip  # Individual term entries → in-app hover definitions
+              # Each bolded term becomes a trigger; the sentence(s) following it become the tooltip text.
+              # The build-time parser reads: **Term** — definition...
 ---
 
 # MajorOps Glossary
@@ -125,6 +130,9 @@ The structured process for analyzing and improving incident response practices o
 
 **Binary Scorecard**
 An auditable record of yes/no criteria based on incident behavior, escalation accuracy, and policy compliance. Used to assess incident quality and team performance.
+
+**Peer Review**
+A structured quality assessment of a MIM's incident command, completed by a second certified MIM after incident close. Covers eight competency domains: Command Presence, Phase Discipline, Air Time Discipline, Escalation Judgment, Stakeholder Communication, Recovery Track Management, Incident Record Quality, and Close-Out Readiness. Produces a locked PR-{number} record attached to the incident. Separate from the After Action — the After Action examines the incident; the Peer Review examines the command. See `docs/governance/peer-review.md`.
 
 **Accredited Responder**
 An engineer or support leader who has completed a defined training path and is current on policy and technical response practice. Accredited responders are eligible for P1 command roles.

@@ -156,6 +156,10 @@ function ViewSwitcher({ incidentId }: { incidentId: number }) {
       <span className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest bg-ops-red text-white">Terminal</span>
       <Link to={`/admin/incidents/${incidentId}/focus`}
         className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-dim hover:text-ops-text hover:bg-ops-muted transition-colors">Focus</Link>
+      <Link to={`/admin/incidents/${incidentId}/review`}
+        className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-amber/70 hover:text-ops-amber hover:bg-ops-muted transition-colors">Review</Link>
+      <Link to={`/admin/incidents/${incidentId}/debrief`}
+        className="px-2.5 py-1 font-mono text-[9px] uppercase tracking-widest text-ops-green/60 hover:text-ops-green hover:bg-ops-muted transition-colors">Debrief</Link>
     </div>
   )
 }

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Run Card — Production Database Unreachable | MajorOps</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&family=Saira+Condensed:wght@600;700;800;900&family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── BRAND TOKENS ─────────────────────────────────────────── */
+    :root {
+      --color-fire-red:        #CC0000;
+      --color-fire-red-dark:   #990000;
+      --color-fire-red-light:  #FF3333;
+      --color-green:           #00CC00;
+      --color-green-bright:    #00FF00;
+      --color-green-dim:       #008800;
+      --color-black:           #0A0A0A;
+      --color-white:           #FFFFFF;
+      --color-charcoal:        #1A1A1A;
+      --color-slate:           #2A2A2A;
+      --color-storm:           #404040;
+      --color-fog:             #808080;
+      --color-smoke:           #CCCCCC;
+
+      --color-status-critical: #CC0000;
+      --color-status-high:     #FF6600;
+      --color-status-medium:   #FFAA00;
+      --color-status-low:      #00CC00;
+
+      --font-display: 'Orbitron', sans-serif;
+      --font-heading: 'Saira Condensed', sans-serif;
+      --font-body:    'IBM Plex Sans', sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+
+      --space-2xs: 4px;
+      --space-xs:  8px;
+      --space-sm:  12px;
+      --space-md:  16px;
+      --space-lg:  24px;
+      --space-xl:  32px;
+      --space-2xl: 48px;
+
+      --radius: 0px;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+
+    /* ── RESET ────────────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-radius: var(--radius);
+    }
+
+    body {
+      background-color: var(--color-black);
+      color: var(--color-white);
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── LAYOUT ───────────────────────────────────────────────── */
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: var(--space-xl) var(--space-lg);
+    }
+
+    /* ── LOGO ─────────────────────────────────────────────────── */
+    .logo {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0;
+      text-decoration: none;
+      line-height: 1;
+    }
+    .logo .prompt {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--color-fire-red);
+      animation: blink 1.5s infinite;
+      position: relative;
+      top: 1px;
+      margin-right: 4px;
+    }
+    .logo .major {
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--color-fire-red);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+    .logo .ops {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-white);
+      letter-spacing: -1px;
+      text-transform: lowercase;
+    }
+
+    /* ── TOP BAR ──────────────────────────────────────────────── */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: var(--space-md);
+      border-bottom: 2px solid var(--color-fire-red);
+      margin-bottom: var(--space-xl);
+    }
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+
+    /* ── INCIDENT HEADER ──────────────────────────────────────── */
+    .incident-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-xl);
+    }
+    .incident-type-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      margin-bottom: var(--space-xs);
+    }
+    .incident-title {
+      font-family: var(--font-heading);
+      font-size: 36px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-white);
+      line-height: 1.1;
+    }
+    .incident-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: var(--space-xs);
+      flex-shrink: 0;
+    }
+
+    /* ── BADGES ───────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--space-2xs) var(--space-sm);
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      border: 1px solid;
+    }
+    .badge-p1     { color: var(--color-status-critical); border-color: var(--color-status-critical); background: rgba(204,0,0,0.1); }
+    .badge-box3   { color: var(--color-white); border-color: var(--color-fire-red); background: var(--color-fire-red-dark); }
+    .badge-can    { color: var(--color-green); border-color: var(--color-green-dim); }
+    .badge-action { color: var(--color-status-high); border-color: var(--color-status-high); }
+    .badge-need   { color: var(--color-status-medium); border-color: var(--color-status-medium); }
+    .badge-version { color: var(--color-fog); border-color: var(--color-storm); font-family: var(--font-mono); }
+
+    /* ── PHASE BAR ────────────────────────────────────────────── */
+    .phase-bar {
+      display: flex;
+      gap: 2px;
+      margin-bottom: var(--space-xl);
+    }
+    .phase-step {
+      flex: 1;
+      padding: var(--space-xs) var(--space-md);
+      font-family: var(--font-heading);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: center;
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%, 10px 50%);
+    }
+    .phase-step:first-child { clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%); }
+    .phase-step:last-child  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10px 50%); }
+    .phase-step.done    { background: var(--color-green-dim); color: var(--color-green); }
+    .phase-step.active  { background: var(--color-fire-red-dark); color: var(--color-white); }
+    .phase-step.future  { background: var(--color-storm); color: var(--color-fog); }
+
+    /* ── GRID ─────────────────────────────────────────────────── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-lg);
+      margin-bottom: var(--space-lg);
+    }
+
+    /* ── CARDS ────────────────────────────────────────────────── */
+    .card {
+      background: var(--color-charcoal);
+      border: 1px solid var(--color-slate);
+      padding: var(--space-lg);
+    }
+    .card-red   { border-left: 4px solid var(--color-fire-red); }
+    .card-green { border-left: 4px solid var(--color-green); }
+    .card-amber { border-left: 4px solid var(--color-status-medium); }
+    .card-orange{ border-left: 4px solid var(--color-status-high); }
+
+    /* ── CARD HEADER ──────────────────────────────────────────── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-slate);
+    }
+    .card-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-white);
+    }
+
+    /* ── CHECKLIST ────────────────────────────────────────────── */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 13px;
+      color: var(--color-smoke);
+      line-height: 1.4;
+    }
+    .check-box {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--color-storm);
+      margin-top: 1px;
+      background: var(--color-black);
+    }
+    .checklist li .item-note {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-fog);
+      margin-top: 2px;
+    }
+    .checklist li strong {
+      color: var(--color-white);
+    }
+
+    /* ── RESPONDER TABLE ──────────────────────────────────────── */
+    .responder-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .responder-table th {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      padding: var(--space-xs) var(--space-sm);
+      text-align: left;
+      border-bottom: 1px solid var(--color-slate);
+    }
+    .responder-table td {
+      padding: var(--space-sm);
+      font-size: 13px;
+      color: var(--color-smoke);
+      border-bottom: 1px solid rgba(42,42,42,0.5);
+      vertical-align: top;
+    }
+    .responder-table td:first-child {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--color-white);
+      white-space: nowrap;
+      padding-right: var(--space-md);
+    }
+    .responder-table .required {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--color-fire-red);
+      text-transform: uppercase;
+    }
+    .responder-table .optional {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--color-fog);
+      text-transform: uppercase;
+    }
+
+    /* ── TIMEBOX TABLE ────────────────────────────────────────── */
+    .timebox-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-sm) 0;
+      border-bottom: 1px solid var(--color-slate);
+    }
+    .timebox-row:last-child { border-bottom: none; }
+    .timebox-clock {
+      font-family: var(--font-mono);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-fire-red);
+      min-width: 60px;
+    }
+    .timebox-label {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-white);
+    }
+    .timebox-desc {
+      font-size: 12px;
+      color: var(--color-fog);
+    }
+
+    /* ── EXPOSURE LINE ────────────────────────────────────────── */
+    .exposure-block {
+      background: var(--color-black);
+      border: 1px solid var(--color-slate);
+      border-left: 4px solid var(--color-fire-red);
+      padding: var(--space-md) var(--space-lg);
+      margin-bottom: var(--space-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--space-xl);
+    }
+    .exposure-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--color-fog);
+      white-space: nowrap;
+    }
+    .exposure-code {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--color-fire-red);
+      letter-spacing: 2px;
+    }
+    .exposure-note {
+      font-size: 12px;
+      color: var(--color-fog);
+    }
+
+    /* ── ESCALATION PATH ──────────────────────────────────────── */
+    .escalation-path {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      flex-wrap: wrap;
+    }
+    .escalation-node {
+      font-family: var(--font-heading);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--color-white);
+      background: var(--color-slate);
+      padding: var(--space-2xs) var(--space-sm);
+      border: 1px solid var(--color-storm);
+    }
+    .escalation-arrow {
+      font-family: var(--font-mono);
+      color: var(--color-fire-red);
+      font-size: 16px;
+    }
+
+    /* ── RELEASE CRITERIA ─────────────────────────────────────── */
+    .release-criteria {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .release-criteria li {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-sm);
+      font-size: 13px;
+      color: var(--color-smoke);
+    }
+    .release-criteria .check-ok {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--color-green);
+      margin-top: 1px;
+    }
+
+    /* ── FOOTER ───────────────────────────────────────────────── */
+    .footer {
+      margin-top: var(--space-2xl);
+      padding-top: var(--space-md);
+      border-top: 1px solid var(--color-slate);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--color-fog);
+    }
+
+    /* ── DIVIDER ──────────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--color-slate);
+      margin: var(--space-xl) 0;
+    }
+
+    /* ── PRINT ────────────────────────────────────────────────── */
+    @media print {
+      body { background: #fff; color: #000; }
+      .page { padding: 0; }
+    }
+
+    @media (max-width: 700px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .incident-header { flex-direction: column; }
+      .incident-meta { align-items: flex-start; }
+    }
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <a class="logo" href="runcard-browser.html">
+      <span class="prompt">></span>
+      <span class="major">MAJOR</span>
+      <span class="ops">ops</span>
+    </a>
+    <div class="top-bar-right">
+      <span class="badge badge-version">RC-DB-001</span>
+      <span class="badge badge-version">v1.0</span>
+      <span class="badge" style="color:#CC8800;border-color:#CC8800;">TIER 3 · SPECIFIC APP</span>
+      <span class="badge badge-box3">BOX 3</span>
+      <span class="badge badge-p1">P1 — CRITICAL</span>
+    </div>
+  </div>
+
+  <!-- BREADCRUMB -->
+  <div style="font-family:var(--font-mono);font-size:10px;color:var(--color-fog);letter-spacing:0.05em;margin-bottom:16px;">
+    <a href="runcard-browser.html" style="color:var(--color-fog);text-decoration:none;">Run Card Browser</a>
+    &rsaquo; IT Infrastructure &rsaquo; Database Services &rsaquo; Production Database
+  </div>
+
+  <!-- INCIDENT HEADER -->
+  <div class="incident-header">
+    <div>
+      <div class="incident-type-label">Specific App Run Card &nbsp;·&nbsp; IT Infrastructure › Database Services</div>
+      <div class="incident-title">Production Database<br>Unreachable</div>
+    </div>
+    <div class="incident-meta">
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-fog);">ALARM LEVEL</div>
+      <div style="font-family: var(--font-heading); font-size: 48px; font-weight: 900; color: var(--color-fire-red); line-height: 1; letter-spacing: 2px;">BOX 3</div>
+      <div style="font-family: var(--font-mono); font-size: 11px; color: var(--color-fire-red); letter-spacing: 2px;">FULL RESPONSE</div>
+    </div>
+  </div>
+
+  <!-- EXAMPLE EXPOSURE LINE -->
+  <div class="exposure-block">
+    <div class="exposure-label">Initial Exposure</div>
+    <div class="exposure-code">T3C(~)R(~)</div>
+    <div class="exposure-note">Typical at open — 3 teams engaged, confidence and recovery path not yet assessed.<br>Update every 15 minutes. Publish on bridge and in incident chat.</div>
+  </div>
+
+  <!-- REQUIRED RESPONDERS -->
+  <div class="card card-red" style="margin-bottom: var(--space-lg);">
+    <div class="card-header">
+      <div class="card-title">Required Responders</div>
+    </div>
+    <table class="responder-table">
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Who</th>
+          <th>Required</th>
+          <th>First Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>MIM / IC</td>
+          <td>Certified Major Incident Manager</td>
+          <td><span class="required">Required</span></td>
+          <td>Open incident, assign command, declare Box 3</td>
+        </tr>
+        <tr>
+          <td>Operations Chief</td>
+          <td>Senior DBA or Infrastructure Lead</td>
+          <td><span class="required">Required</span></td>
+          <td>Triage DB connectivity, confirm scope</td>
+        </tr>
+        <tr>
+          <td>App SME</td>
+          <td>Application owner(s) for affected services</td>
+          <td><span class="required">Required</span></td>
+          <td>Confirm app-layer impact, check retry behavior</td>
+        </tr>
+        <tr>
+          <td>Network/Infra</td>
+          <td>Network or cloud infrastructure engineer</td>
+          <td><span class="required">Required</span></td>
+          <td>Check network path, DNS, firewall rules</td>
+        </tr>
+        <tr>
+          <td>PIO / Comms</td>
+          <td>Customer Communications Lead</td>
+          <td><span class="required">Required</span></td>
+          <td>Draft initial customer alert, update status page</td>
+        </tr>
+        <tr>
+          <td>Security / SO</td>
+          <td>InfoSec or Compliance Lead</td>
+          <td><span class="optional">If data exposure risk</span></td>
+          <td>Assess data breach risk, advise on recovery path safety</td>
+        </tr>
+        <tr>
+          <td>Vendor / LO</td>
+          <td>Cloud provider or DB vendor contact</td>
+          <td><span class="optional">If cloud/vendor DB</span></td>
+          <td>Open P1 support ticket, get on vendor bridge</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CAN: CONDITIONS / ACTIONS / NEEDS -->
+  <div class="grid-3">
+
+    <!-- CONDITIONS -->
+    <div class="card card-green">
+      <div class="card-header">
+        <span class="badge badge-can">C</span>
+        <div class="card-title">Conditions to Gather</div>
+      </div>
+      <ul class="checklist">
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Which database(s)?</strong>
+            <span class="item-note">Primary, replica, both? Specific host?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>When did it go unreachable?</strong>
+            <span class="item-note">First alert time vs. confirmed outage time</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>What can connect and what can't?</strong>
+            <span class="item-note">App servers? Read replicas? Admin access?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Any recent changes?</strong>
+            <span class="item-note">Deployments, schema migrations, infra changes, cert rotations?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Error message or log snippet?</strong>
+            <span class="item-note">Connection timeout? Auth failure? Port unreachable?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Customer impact confirmed?</strong>
+            <span class="item-note">Which features / customers / regions?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Is this a cloud-managed DB?</strong>
+            <span class="item-note">RDS, Cloud SQL, Atlas, Azure SQL, etc.?</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="card card-orange">
+      <div class="card-header">
+        <span class="badge badge-action">A</span>
+        <div class="card-title">Initial Actions</div>
+      </div>
+      <ul class="checklist">
+        <li>
+          <div class="check-box"></div>
+          <div><strong>MIM opens incident</strong>
+            <span class="item-note">Severity: P1. Alarm Level: Box 3. Assign command.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Ping DB host directly</strong>
+            <span class="item-note">Network vs. DB process — distinguish quickly</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Check DB process status</strong>
+            <span class="item-note">Is the DB process up? Has it crashed or hung?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Check connection pool exhaustion</strong>
+            <span class="item-note">Max connections hit? Zombie connections?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Review DB and system logs</strong>
+            <span class="item-note">OOM kill, disk full, auth errors, deadlock?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Open vendor P1 ticket if cloud DB</strong>
+            <span class="item-note">Do not wait — open in parallel with triage</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>MIM posts first milestone</strong>
+            <span class="item-note">T+15 minutes. CAN format. Stakeholder view updated.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- NEEDS -->
+    <div class="card card-amber">
+      <div class="card-header">
+        <span class="badge badge-need">N</span>
+        <div class="card-title">Needs / Escalation</div>
+      </div>
+      <ul class="checklist">
+        <li>
+          <div class="check-box"></div>
+          <div><strong>DB admin access confirmed?</strong>
+            <span class="item-note">If not — who has it? Get them on the bridge now.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Failover runbook located?</strong>
+            <span class="item-note">Where is it? Who owns it? Is it current?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Leadership aware?</strong>
+            <span class="item-note">E2 posture if customer-facing. Exec SMS trigger.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Backup availability confirmed?</strong>
+            <span class="item-note">Last backup time? Restore tested? RTO/RPO known?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Security / compliance notified?</strong>
+            <span class="item-note">If data may be compromised or inaccessible to regulators.</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>Read replica available?</strong>
+            <span class="item-note">Can traffic fail over to read replica temporarily?</span>
+          </div>
+        </li>
+        <li>
+          <div class="check-box"></div>
+          <div><strong>MIM: update exposure line</strong>
+            <span class="item-note">Every 15 min. If R(U) → escalate immediately.</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ESCALATION PATH -->
+  <div class="card" style="margin-bottom: var(--space-lg);">
+    <div class="card-header">
+      <div class="card-title">Escalation Path</div>
+    </div>
+    <div class="escalation-path">
+      <div class="escalation-node">App SME</div>
+      <div class="escalation-arrow">→</div>
+      <div class="escalation-node">DB / Ops Chief</div>
+      <div class="escalation-arrow">→</div>
+      <div class="escalation-node">MIM</div>
+      <div class="escalation-arrow">→</div>
+      <div class="escalation-node">Engineering Director</div>
+      <div class="escalation-arrow">→</div>
+      <div class="escalation-node">CTO / Exec</div>
+    </div>
+    <div style="margin-top: var(--space-md); font-size: 12px; color: var(--color-fog);">
+      Trigger escalation up the chain when: recovery path is unknown (R(U)) for &gt;15 minutes, vendor has not engaged within 30 minutes, or data integrity risk is identified.
+    </div>
+  </div>
+
+  <!-- TIMEBOXES -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Response Timeboxes</div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-clock">T+5</div>
+        <div>
+          <div class="timebox-label">Bridge Open / Command Assigned</div>
+          <div class="timebox-desc">MIM active. All required responders on call or paged.</div>
+        </div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-clock">T+10</div>
+        <div>
+          <div class="timebox-label">Conditions Gathered</div>
+          <div class="timebox-desc">All teams have reported CAN to MIM. Scope confirmed.</div>
+        </div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-clock">T+15</div>
+        <div>
+          <div class="timebox-label">First Milestone Published</div>
+          <div class="timebox-desc">Stakeholders updated. Exposure notation published.</div>
+        </div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-clock">T+20</div>
+        <div>
+          <div class="timebox-label">Recovery Track Opened</div>
+          <div class="timebox-desc">Primary recovery path identified. Assignee and timebox set.</div>
+        </div>
+      </div>
+      <div class="timebox-row">
+        <div class="timebox-clock">T+30</div>
+        <div>
+          <div class="timebox-label">Customer Alert Decision</div>
+          <div class="timebox-desc">PIO issues customer alert or MIM documents why not.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RELEASE CRITERIA -->
+    <div class="card card-green">
+      <div class="card-header">
+        <div class="card-title">Release Criteria</div>
+      </div>
+      <div style="font-size: 12px; color: var(--color-fog); margin-bottom: var(--space-md);">
+        Responders are not released until MIM confirms all of the following:
+      </div>
+      <ul class="release-criteria">
+        <li>
+          <div class="check-ok">✓</div>
+          <div>Database is confirmed reachable from all application servers</div>
+        </li>
+        <li>
+          <div class="check-ok">✓</div>
+          <div>Application teams have validated their services are operating normally</div>
+        </li>
+        <li>
+          <div class="check-ok">✓</div>
+          <div>Monitoring alerts have cleared or been acknowledged with explanation</div>
+        </li>
+        <li>
+          <div class="check-ok">✓</div>
+          <div>Customer impact has been assessed — alert issued or documented as not triggered</div>
+        </li>
+        <li>
+          <div class="check-ok">✓</div>
+          <div>Root cause known or formally deferred to Learning Review</div>
+        </li>
+        <li>
+          <div class="check-ok">✓</div>
+          <div>MIM has posted the resolution milestone with duration and known cause</div>
+        </li>
+        <li>
+          <div class="check-ok">✓</div>
+          <div>After Action scheduled (within 5 business days for P1)</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">RC-DB-001 &nbsp;·&nbsp; Production Database Unreachable &nbsp;·&nbsp; v1.0</div>
+    <div class="footer-text">majorops.io &nbsp;·&nbsp; CC BY 4.0</div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -3,8 +3,12 @@ main = "src/index.ts"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-# Routes — wildcard catches all subdomains of mim.run
-# The apex domain (mim.run) is served by Cloudflare Pages directly.
+# This Worker only handles subdomain routing and shortlinks.
+# Keep it thin on purpose: redirects are cheap, easy to reason about, and do
+# not need a framework unless this grows into a richer request layer.
+
+# Wildcard routes catch all mim.run subdomains.
+# The apex domain (mim.run) is still served by Cloudflare Pages directly.
 [[routes]]
 pattern = "*.mim.run/*"
 zone_name = "mim.run"
@@ -13,13 +17,15 @@ zone_name = "mim.run"
 pattern = "*.mim.run"
 zone_name = "mim.run"
 
-# When D1 is ready, bind it here:
+# Future binding notes for the repo owner:
+# Add D1 here only if the router needs to look up incidents dynamically instead
+# of just translating shortlinks into destination URLs.
 # [[d1_databases]]
 # binding = "DB"
 # database_name = "majorops"
 # database_id = "your-d1-database-id"
 
-# When KV is ready for caching:
+# Add KV only if you need cached lookup tables or hot shortlink metadata.
 # [[kv_namespaces]]
 # binding = "CACHE"
 # id = "your-kv-namespace-id"

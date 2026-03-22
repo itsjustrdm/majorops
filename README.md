@@ -45,9 +45,9 @@ Built entirely on Cloudflare's edge platform:
 
 | Component | Technology | Purpose |
 |---|---|---|
-| API & Backend | Cloudflare Workers + Hono | REST API, business logic, auth middleware |
+| API & Backend | Cloudflare Workers | REST API, business logic, D1 access, auth middleware |
 | Database | Cloudflare D1 (SQLite) | Incidents, phase logs, status updates, command data |
-| Frontend | React + TypeScript + Vite | Operator dashboard, public status page, admin portal |
+| Frontend | React + TypeScript + Vite | Operator dashboard, public status page, executive views, and native docs reader |
 | Styling | Tailwind CSS | Fire department red dark-mode design system |
 | Auth | Google OAuth (via Mocha Users Service) | Operator authentication — viewers are unauthenticated |
 | Hosting | Cloudflare Pages | Static frontend deployment |
@@ -63,12 +63,12 @@ No servers. No DevOps. Globally distributed on day one.
 ```
 majorops/
 ├── apps/
-│   ├── web/                 # React + TypeScript + Vite — operator dashboard, status page, admin portal
-│   ├── worker/              # Cloudflare Worker + Hono — REST API, business logic, auth middleware
+│   ├── web/                 # React + TypeScript + Vite — app UI and markdown docs reader
+│   ├── worker/              # Cloudflare Worker — API, business logic, auth, D1 access
 │   └── cli/                 # CLI (planned) — mim new / mim update
 ├── migrations/              # D1 schema, versioned
 ├── schema/                  # Shared type definitions
-├── docs/                    # MkDocs Material documentation site (deploys to majorops.io)
+├── docs/                    # Canonical markdown content, compiled into the React app at build time
 │   ├── philosophy/
 │   │   ├── PHILOSOPHY.md          # Core principles — why MajorOps exists and how it thinks
 │   │   ├── ICS-IT-STRUCTURE.md    # IT Incident Command System — role definitions and command structure
@@ -82,17 +82,11 @@ majorops/
 │   │   └── *.html                 # Tier 1/2/3 runcard examples
 │   ├── api-reference/             # API docs (stub — auto-gen from OpenAPI planned)
 │   ├── user-guide/                # MIM user guide (in progress)
-│   ├── stylesheets/
-│   │   └── extra.css              # Brand CSS overrides for MkDocs Material
 │   ├── GLOSSARY.md                # Shared vocabulary
 │   ├── ALARM-LEVELS.md            # Box 0–3 escalation system
 │   ├── RUNCARD-SYSTEM.md          # Three-tier dispatch architecture
 │   ├── CONTRIBUTING.md            # Contribution guidelines
 │   └── index.md                   # Site home
-├── overrides/
-│   └── main.html                  # MkDocs template override — draft banner
-├── mkdocs.yml                     # MkDocs Material config
-├── requirements.txt               # mkdocs-material
 ├── ROADMAP.md
 ├── DATA_MODEL.md
 ├── BRAND.md
@@ -135,14 +129,6 @@ npm run dev
 
 Requires a `.dev.vars` file with Cloudflare and Mocha credentials. See `wrangler.json` for binding names.
 
-```bash
-# Documentation site
-pip install mkdocs-material
-mkdocs serve
-```
-
----
-
 ## Roadmap
 
 See [`ROADMAP.md`](./ROADMAP.md) for phased delivery plan.
@@ -151,14 +137,7 @@ See [`ROADMAP.md`](./ROADMAP.md) for phased delivery plan.
 
 ## Documentation
 
-The `docs/` folder is a full MkDocs Material site covering the framework behind MajorOps — the principles, command structure, run card system, alarm levels, glossary, and governance processes. It deploys to `majorops.io` via Cloudflare Pages.
-
-To run the docs locally:
-
-```bash
-pip install mkdocs-material
-mkdocs serve
-```
+The `docs/` folder is the canonical markdown source for the docs experience inside the app. Vite reads those files at build time and the React docs view renders them using the same visual system as the rest of MajorOps.
 
 **Latest additions:** Stakeholder and Executive user guides plus a reusable Data Dictionary page (sourced from `DATA_MODEL.md`).
 
@@ -173,7 +152,7 @@ Pages marked `draft: true` in frontmatter display a DRAFT banner and are pending
 
 > ✅ v0.1 complete — core incident management, 8-phase tracking, public status page, operator dashboard, admin portal, command assignments, recovery path tracking, validation tracking, configurable severities.
 >
-> ✅ Documentation site (MkDocs Material) — philosophy, command structure, run card system, alarm levels, glossary, governance — deployed to Cloudflare Pages.
+> ✅ Native app documentation — philosophy, command structure, run card system, alarm levels, glossary, governance — rendered from markdown inside the product UI.
 >
 > 🚧 Active development — tiered views, Cloudflare Access migration, CLI, comms engine, and `majorops.io` launch next.
 

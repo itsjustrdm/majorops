@@ -2,6 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MAJOROPS — THEME VARIABLES
+   Three modes: slate (default) | graphite (light) | dusk (dark)
+
+   What makes depth work: each surface layer needs a 10+ unit gap from
+   the one below it, on all three RGB channels. Obsidian only had 7.
+
+   Surface tokens → space-separated RGB channels (supports /opacity)
+   Text tokens    → full rgba() string (no opacity modifier needed)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── SLATE  (default — dark navy) ───────────────────────────────────────
+   Gap: bg→surface +9  |  surface→muted +11  |  bg→border +35
+   ──────────────────────────────────────────────────────────────────── */
+:root,
+[data-theme="slate"] {
+  --ops-bg:      13 17 23;          /* #0D1117                            */
+  --ops-surface: 22 27 34;          /* #161B22  +9 from bg                */
+  --ops-muted:   33 38 45;          /* #21262D  +11 from surface          */
+  --ops-border:  48 54 61;          /* #30363D  +15 from muted            */
+  --ops-text:    rgba(230, 237, 243, 0.90);
+  --ops-dim:     rgba(139, 148, 158, 0.72);
+  --scrollbar-track: #0D1117;
+  --scrollbar-thumb: #30363D;
+  /* Doc content — code tokens (dark theme: light cyan) */
+  --doc-code-fg:  rgba(126, 210, 230, 0.92);
+  --doc-code-bg:  rgba(33, 38, 45, 1);
+  --doc-code-border: rgba(48, 54, 61, 1);
+}
+
+/* ── GRAPHITE  (light — cool stone grey) ────────────────────────────────
+   Gap: bg→surface +9  |  surface→muted −14  |  bg→border −38
+   Inverted: bg is the darkest, surface lightest (cards "lift" from floor)
+   ──────────────────────────────────────────────────────────────────── */
+[data-theme="graphite"] {
+  --ops-bg:      228 228 234;       /* #E4E4EA  cool stone grey           */
+  --ops-surface: 243 243 248;       /* #F3F3F8  cards lift off floor +15  */
+  --ops-muted:   216 216 224;       /* #D8D8E0  recessed sections  −12    */
+  --ops-border:  192 192 206;       /* #C0C0CE  clearly visible  −36      */
+  --ops-text:    rgba(16, 16, 34, 0.92);
+  --ops-dim:     rgba(70, 78, 102, 0.82);
+  --scrollbar-track: #E4E4EA;
+  --scrollbar-thumb: #C0C0CE;
+  /* Doc content — code tokens (light theme: dark blue) */
+  --doc-code-fg:  #1a5f7a;
+  --doc-code-bg:  rgba(204, 210, 220, 0.5);
+  --doc-code-border: rgba(168, 176, 196, 0.8);
+}
+
+/* ── DUSK  (dark — warm charcoal, real layer depth) ─────────────────────
+   Gap: bg→surface +10  |  surface→muted +10  |  bg→border +36
+   Blue-charcoal hue prevents the "dead black" flatness of full dark.
+   Brand colors (red, amber, green) pop vividly against this palette.
+   ──────────────────────────────────────────────────────────────────── */
+[data-theme="dusk"] {
+  --ops-bg:      26 30 38;          /* #1A1E26  warm charcoal navy        */
+  --ops-surface: 36 41 51;          /* #242933  +10 from bg               */
+  --ops-muted:   46 52 65;          /* #2E3441  +10 from surface          */
+  --ops-border:  62 70 88;          /* #3E4658  +16 from muted            */
+  --ops-text:    rgba(222, 228, 242, 0.90);
+  --ops-dim:     rgba(136, 147, 170, 0.70);
+  --scrollbar-track: #1A1E26;
+  --scrollbar-thumb: #3E4658;
+  /* Doc content — code tokens (dark theme: light cyan) */
+  --doc-code-fg:  rgba(126, 210, 230, 0.92);
+  --doc-code-bg:  rgba(46, 52, 65, 1);
+  --doc-code-border: rgba(62, 70, 88, 1);
+}
+
+/* ════════════════════════════════════════════════════════════════════════ */
+
 @layer base {
   * {
     border-radius: 0 !important;
@@ -9,30 +80,28 @@
   }
 
   html {
-    background-color: #0A0A0A;
-    color: rgba(242, 242, 242, 0.87);
+    background-color: rgb(var(--ops-bg));
+    color: var(--ops-text);
+    /* smooth theme transition */
+    transition: background-color 0.18s ease, color 0.18s ease;
   }
 
   body {
     font-family: 'IBM Plex Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(204, 0, 0, 0.10), transparent 28%),
+      radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 24%),
+      rgb(var(--ops-bg));
   }
 
   /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
-  }
-  ::-webkit-scrollbar-track {
-    background: #0A0A0A;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: #2A2A2A;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: #CC0000;
-  }
+  ::-webkit-scrollbar        { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
+  ::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); }
+  ::-webkit-scrollbar-thumb:hover { background: #CC0000; }
 
   /* Selection */
   ::selection {
@@ -42,7 +111,7 @@
 }
 
 @layer components {
-  /* Scanline overlay — subtle CRT texture on the header */
+  /* Scanline overlay — subtle CRT texture */
   .scanlines::after {
     content: '';
     position: absolute;
@@ -57,10 +126,193 @@
     pointer-events: none;
     z-index: 1;
   }
+
+  .ops-grid-bg {
+    background-image:
+      linear-gradient(to right, rgb(var(--ops-border) / 0.12) 1px, transparent 1px),
+      linear-gradient(to bottom, rgb(var(--ops-border) / 0.12) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 92%);
+  }
+
+  .ops-panel {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgb(var(--ops-border) / 0.85);
+    background:
+      linear-gradient(180deg, rgb(var(--ops-surface) / 0.92), rgb(var(--ops-surface) / 0.72));
+    box-shadow:
+      0 24px 80px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .ops-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 42%);
+    pointer-events: none;
+  }
 }
 
 @layer utilities {
-  .font-700 { font-weight: 700; }
-  .font-900 { font-weight: 900; }
+  .font-700     { font-weight: 700; }
+  .font-900     { font-weight: 900; }
   .tabular-nums { font-variant-numeric: tabular-nums; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   DOC CONTENT — rendered markdown styles
+   All classes prefixed doc- to avoid collisions.
+   ════════════════════════════════════════════════════════════════════════ */
+
+.doc-content {
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--ops-text);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.doc-h1 { font-family: 'Saira Condensed', sans-serif; font-size: 1.9rem; font-weight: 700; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ops-text); margin: 0 0 1.25rem; line-height: 1.15; }
+.doc-h2 { font-family: 'Saira Condensed', sans-serif; font-size: 1.35rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ops-text); margin: 2.25rem 0 0.75rem; padding-bottom: 0.45rem; border-bottom: 1px solid rgb(var(--ops-border)); line-height: 1.2; }
+.doc-h3 { font-family: 'Saira Condensed', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ops-text); margin: 1.75rem 0 0.5rem; line-height: 1.2; }
+.doc-h4 { font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ops-dim); margin: 1.5rem 0 0.4rem; }
+.doc-h5, .doc-h6 { font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ops-dim); margin: 1.25rem 0 0.35rem; }
+
+.doc-p { margin: 0 0 1rem; }
+
+.doc-blockquote {
+  margin: 1.25rem 0;
+  padding: 0.75rem 1.1rem;
+  border-left: 3px solid #CC0000;
+  background: rgb(var(--ops-muted));
+  color: var(--ops-dim);
+  font-style: italic;
+  font-size: 0.92em;
+}
+
+.doc-hr {
+  border: none;
+  border-top: 1px solid rgb(var(--ops-border));
+  margin: 2rem 0;
+}
+
+/* Code */
+.doc-pre {
+  background: var(--doc-code-bg);
+  border: 1px solid var(--doc-code-border);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  margin: 1rem 0 1.25rem;
+}
+.doc-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--doc-code-fg);
+  white-space: pre;
+}
+.doc-inline-code {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82em;
+  color: var(--doc-code-fg);
+  background: var(--doc-code-bg);
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--doc-code-border);
+}
+
+/* Lists */
+.doc-ul { list-style: none; margin: 0.5rem 0 1rem; padding-left: 1.25rem; }
+.doc-ol { list-style: decimal; margin: 0.5rem 0 1rem; padding-left: 1.75rem; }
+.doc-li { margin: 0.3rem 0; position: relative; }
+.doc-ul > .doc-li::before { content: '›'; position: absolute; left: -1.1rem; color: #CC0000; font-weight: 700; }
+
+/* Links */
+.doc-link {
+  color: #CC0000;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(204, 0, 0, 0.3);
+  transition: border-color 0.15s;
+}
+.doc-link:hover { border-color: #CC0000; }
+
+/* Button-style links (.md-button style blocks in markdown) */
+.doc-link--button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-bottom: none;
+  border: 1px solid #CC0000;
+  padding: 0.4rem 0.9rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #CC0000;
+  background: rgba(204,0,0,0.06);
+  transition: background 0.15s, color 0.15s;
+  margin: 0.25rem 0;
+}
+.doc-link--button:hover {
+  background: rgba(204,0,0,0.14);
+  color: #CC0000;
+}
+
+/* Tables */
+.doc-table-wrap { overflow-x: auto; margin: 1.25rem 0; }
+.doc-table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+.doc-th {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ops-dim);
+  background: rgb(var(--ops-muted));
+  border: 1px solid rgb(var(--ops-border));
+  padding: 0.5rem 0.85rem;
+  text-align: left;
+  white-space: nowrap;
+}
+.doc-td {
+  border: 1px solid rgb(var(--ops-border));
+  padding: 0.5rem 0.85rem;
+  color: var(--ops-text);
+  vertical-align: top;
+}
+.doc-table tbody tr:hover .doc-td { background: rgb(var(--ops-muted)); }
+
+/* Admonitions */
+.doc-admonition {
+  margin: 1.25rem 0;
+  border: 1px solid rgb(var(--ops-border));
+  border-left-width: 3px;
+}
+.doc-admonition--note    { border-left-color: #3B82F6; }
+.doc-admonition--info    { border-left-color: #3B82F6; }
+.doc-admonition--warning { border-left-color: #F59E0B; }
+.doc-admonition--danger  { border-left-color: #CC0000; }
+.doc-admonition--tip     { border-left-color: #22C55E; }
+.doc-admonition--success { border-left-color: #22C55E; }
+
+.doc-admonition__title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ops-dim);
+  background: rgb(var(--ops-muted));
+  padding: 0.4rem 0.85rem;
+  border-bottom: 1px solid rgb(var(--ops-border));
+}
+.doc-admonition--note    .doc-admonition__title,
+.doc-admonition--info    .doc-admonition__title { color: #3B82F6; }
+.doc-admonition--warning .doc-admonition__title { color: #F59E0B; }
+.doc-admonition--danger  .doc-admonition__title { color: #CC0000; }
+.doc-admonition--tip     .doc-admonition__title,
+.doc-admonition--success .doc-admonition__title { color: #22C55E; }
+
+.doc-admonition__body { padding: 0.65rem 0.85rem; font-size: 0.88em; }
+.doc-admonition__body .doc-p { margin: 0.25rem 0; }
+
+/* Definition list styling (def_list extension) */
+.doc-content dt { font-weight: 700; margin-top: 0.75rem; }
+.doc-content dd { margin-left: 1.5rem; color: var(--ops-dim); }

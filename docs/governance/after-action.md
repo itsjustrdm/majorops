@@ -1,5 +1,8 @@
 ---
-draft: true
+draft: false
+tier:
+  - docs     # Full After Action methodology on about.majorops.io
+             # No tooltip or runcard tier — this is reference material, not operational
 ---
 
 # After Action
@@ -238,6 +241,16 @@ The Learning Review draft should be built from the incident record, not from mem
 - Status updates — full comms record, public and internal
 
 If any of this data is absent, the gap is the first finding. Every empty field in the After Action record means something was not captured during the incident. Fix the capture, not the record.
+
+---
+
+---
+
+## Connection to Peer Review
+
+The After Action examines what happened to the incident — the timeline, the technical root cause, the improvement actions.
+
+The **Peer Review** is a separate, complementary process that examines how the MIM ran the response — bridge discipline, phase cadence, escalation judgment, communication quality. Both documents belong in the incident record. See `docs/governance/peer-review.md`.
 
 ---
 
