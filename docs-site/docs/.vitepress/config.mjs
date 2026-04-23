@@ -46,6 +46,8 @@ export default defineConfig({
         items: [
           { text: 'After Action', link: '/governance/after-action' },
           { text: 'Peer Review', link: '/governance/peer-review' },
+          { text: 'Response Reputation Score', link: '/governance/response-reputation' },
+          { text: 'Major Accuracy Scoring', link: '/governance/major-accuracy-scoring' },
         ],
       },
       {
